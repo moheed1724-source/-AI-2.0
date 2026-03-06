@@ -43,7 +43,7 @@ export const AssessmentSection: React.FC = () => {
         },
         body: JSON.stringify({
           // ⚠️ 重点：把下面这行引号里的内容，换成你邮件里收到的 Access Key
-          access_key: "YOUR_ACCESS_KEY_HERE", 
+          access_key: "1e3fbb28-710a-4634-8d6c-630d1e1ce087", 
           '联系方式': formData.contact,
           '申请学位': formData.degree,
           'GPA': formData.gpa,
