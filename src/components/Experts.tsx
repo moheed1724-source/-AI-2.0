@@ -4,27 +4,27 @@ import { Briefcase, Award } from 'lucide-react';
 
 const experts = [
   {
-    name: "Dr. Weber",
-    title: "首席留学规划师",
-    exp: "12年",
+    name: "Emma",
+    title: "留学团队负责人",
+    exp: "15年",
     cases: "1200+",
-    desc: "慕尼黑工业大学博士，10年德国留学咨询经验，擅长理工科高端申请。",
+    desc: "累计规划上万名学子。",
     image: "teacher.jpg"
   },
   {
-    name: "Sarah Li",
-    title: "资深文书专家",
-    exp: "8年",
+    name: "蒋老师",
+    title: "资深欧亚专家",
+    exp: "13年",
     cases: "800+",
-    desc: "海德堡大学日耳曼文学硕士，精通德语写作，帮助数百名学生润色文书。",
+    desc: "90年代公派留学家庭，专注小语种领域13年",
     image: "teacher2.jpg"
   },
   {
-    name: "Markus Zhang",
-    title: "签证与职业顾问",
-    exp: "6年",
+    name: "Thomas",
+    title: "资深德语老师",
+    exp: "11年",
     cases: "500+",
-    desc: "前德国外管局实习经历，熟悉签证政策与德国就业市场。",
+    desc: "多年德英双语教学经验。",
     image: "teacher3.jpg"
   }
 ];
