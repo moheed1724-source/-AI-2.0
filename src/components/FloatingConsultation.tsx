@@ -51,7 +51,7 @@ export const FloatingConsultation: React.FC = () => {
               <div className="bg-gray-100 p-4 rounded-xl inline-block mb-4">
                 <div className="w-40 h-40 bg-white flex items-center justify-center rounded-lg border border-gray-200">
                   <img
-                    src="/qr-code.png"
+                    src="/qrcode.png"
                     alt="WeChat QR Code"
                     className="w-full h-full object-contain"
                     referrerPolicy="no-referrer"
