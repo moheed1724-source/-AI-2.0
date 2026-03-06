@@ -98,7 +98,7 @@ export const Hero: React.FC<{ scrollToAssessment: () => void }> = ({ scrollToAss
             {/* Main Image - Berlin / Tech */}
             <div className="relative z-10 rounded-2xl overflow-hidden shadow-2xl border border-white/10 h-full">
                <img 
-                 src="https://images.unsplash.com/photo-1599946347371-68eb71b16afc?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" 
+                 src="BG.jpg" 
                  alt="Berlin Architecture" 
                  className="w-full h-full object-cover opacity-90 hover:scale-105 transition-transform duration-700"
                  referrerPolicy="no-referrer"
