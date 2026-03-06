@@ -33,7 +33,7 @@ export const Hero: React.FC<{ scrollToAssessment: () => void }> = ({ scrollToAss
               </span>
             </h1>
             <p className="text-lg md:text-xl text-gray-400 mt-6 max-w-lg leading-relaxed">
-              融合15年留德申请大数据与AI核心算法。3分钟精准评估录取概率，量身定制您的 TU9/精英大学 逆袭方案。
+              融合24年留德申请大数据与AI核心算法。3分钟精准评估录取概率，量身定制您的 TU9/精英大学 逆袭方案。
             </p>
           </motion.div>
 
