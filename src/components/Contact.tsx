@@ -42,7 +42,7 @@ export const Contact: React.FC = () => {
           <div className="flex flex-col items-center md:items-end">
              <div className="bg-white p-4 rounded-xl max-w-[200px]">
                 <img 
-                  src="qr-code.png" 
+                  src="qrcode.png" 
                   alt="WeChat QR Code" 
                   className="w-full h-full"
                   referrerPolicy="no-referrer"
