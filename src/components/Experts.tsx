@@ -17,7 +17,7 @@ const experts = [
     exp: "8年",
     cases: "800+",
     desc: "海德堡大学日耳曼文学硕士，精通德语写作，帮助数百名学生润色文书。",
-    image: "teacher.jpg"
+    image: "teacher2.jpg"
   },
   {
     name: "Markus Zhang",
@@ -25,7 +25,7 @@ const experts = [
     exp: "6年",
     cases: "500+",
     desc: "前德国外管局实习经历，熟悉签证政策与德国就业市场。",
-    image: "teacher.jpg"
+    image: "teacher3.jpg"
   }
 ];
 
