@@ -33,11 +33,17 @@ export const AssessmentSection: React.FC = () => {
     setLoading(true);
 
     // 🌟 这里是神奇的 Formspree 一键提交代码
+    // 🌟 换成了 Web3Forms 的一键提交代码
     try {
-      await fetch('https://formspree.io/f/YOUR_FORM_ID_HERE', { // <--- 注意：这里等会儿要换成你的专属链接！
+      await fetch('https://api.web3forms.com/submit', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
         body: JSON.stringify({
+          // ⚠️ 重点：把下面这行引号里的内容，换成你邮件里收到的 Access Key
+          access_key: "YOUR_ACCESS_KEY_HERE", 
           '联系方式': formData.contact,
           '申请学位': formData.degree,
           'GPA': formData.gpa,
@@ -49,7 +55,7 @@ export const AssessmentSection: React.FC = () => {
       });
     } catch (error) {
       console.error("提交表单失败", error);
-      // 失败了也不影响页面展示
+    }
     }
 
     setTimeout(() => {
