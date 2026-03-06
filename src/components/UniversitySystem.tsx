@@ -6,19 +6,19 @@ const universities = [
     name: "慕尼黑工业大学",
     en: "TU Munich",
     desc: "德国最顶尖的理工大学之一，诺贝尔奖得主摇篮。",
-    image: "https://images.unsplash.com/photo-1565034946487-077786996e27?auto=format&fit=crop&w=800&q=80"
+    image: "tum.jpg"
   },
   {
     name: "亚琛工业大学",
     en: "RWTH Aachen",
     desc: "欧洲顶尖理工大学，机械工程专业世界闻名。",
-    image: "https://images.unsplash.com/photo-1590089415225-401eb6b9850d?auto=format&fit=crop&w=800&q=80"
+    image: "RWTH.jpg"
   },
   {
     name: "海德堡大学",
     en: "Heidelberg University",
     desc: "德国最古老的大学，医学与生命科学领域的权威。",
-    image: "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=800&q=80"
+    image: "Heidelberg.jpg"
   }
 ];
 
