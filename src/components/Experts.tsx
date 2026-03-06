@@ -9,7 +9,7 @@ const experts = [
     exp: "12年",
     cases: "1200+",
     desc: "慕尼黑工业大学博士，10年德国留学咨询经验，擅长理工科高端申请。",
-    image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=400&q=80"
+    image: "teacher.jpg"
   },
   {
     name: "Sarah Li",
@@ -17,7 +17,7 @@ const experts = [
     exp: "8年",
     cases: "800+",
     desc: "海德堡大学日耳曼文学硕士，精通德语写作，帮助数百名学生润色文书。",
-    image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=400&q=80"
+    image: "teacher.jpg"
   },
   {
     name: "Markus Zhang",
@@ -25,7 +25,7 @@ const experts = [
     exp: "6年",
     cases: "500+",
     desc: "前德国外管局实习经历，熟悉签证政策与德国就业市场。",
-    image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=400&q=80"
+    image: "teacher.jpg"
   }
 ];
 
