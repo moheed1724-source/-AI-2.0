@@ -1,93 +1,32 @@
 [
-  {
-    "name": "慕尼黑工业大学 (TUM)",
-    "type": "TU9",
-    "tier": "S",
-    "majors": ["机械工程", "计算机", "电气工程", "商科", "经济学"],
-    "minScore": 85
-  },
-  {
-    "name": "亚琛工业大学 (RWTH Aachen)",
-    "type": "TU9",
-    "tier": "S",
-    "majors": ["机械工程", "电气工程", "计算机"],
-    "minScore": 82
-  },
-  {
-    "name": "柏林工业大学 (TU Berlin)",
-    "type": "TU9",
-    "tier": "A",
-    "majors": ["计算机", "机械工程", "电气工程"],
-    "minScore": 78
-  },
-  {
-    "name": "卡尔斯鲁厄理工学院 (KIT)",
-    "type": "TU9",
-    "tier": "A",
-    "majors": ["计算机", "机械工程", "电气工程"],
-    "minScore": 78
-  },
-  {
-    "name": "斯图加特大学",
-    "type": "TU9",
-    "tier": "A",
-    "majors": ["机械工程", "电气工程"],
-    "minScore": 75
-  },
-  {
-    "name": "达姆施塔特工业大学",
-    "type": "TU9",
-    "tier": "A",
-    "majors": ["计算机", "机械工程"],
-    "minScore": 75
-  },
-  {
-    "name": "德累斯顿工业大学",
-    "type": "TU9",
-    "tier": "B",
-    "majors": ["机械工程", "电气工程", "计算机"],
-    "minScore": 70
-  },
-  {
-    "name": "汉诺威大学",
-    "type": "TU9",
-    "tier": "B",
-    "majors": ["机械工程", "电气工程"],
-    "minScore": 70
-  },
-  {
-    "name": "布伦瑞克工业大学",
-    "type": "TU9",
-    "tier": "B",
-    "majors": ["机械工程"],
-    "minScore": 68
-  },
-  {
-    "name": "海德堡大学",
-    "type": "Elite",
-    "tier": "S",
-    "majors": ["医学", "法学", "经济学"],
-    "minScore": 85
-  },
-  {
-    "name": "慕尼黑大学 (LMU)",
-    "type": "Elite",
-    "tier": "S",
-    "majors": ["经济学", "商科", "法学"],
-    "minScore": 85
-  },
-  {
-    "name": "曼海姆大学",
-    "type": "Elite",
-    "tier": "A",
-    "majors": ["经济学", "商科"],
-    "minScore": 80
-  },
-  {
-    "name": "科隆大学",
-    "type": "Elite",
-    "tier": "B",
-    "majors": ["经济学", "商科"],
-    "minScore": 75
-  }
+  { "name": "慕尼黑工业大学 (TUM)", "type": "TU9", "tier": "S", "majors": ["机械工程", "计算机", "电气工程", "商科", "经济学"], "minGpa": 85, "minLang": "german_c1" },
+  { "name": "亚琛工业大学 (RWTH)", "type": "TU9", "tier": "S", "majors": ["机械工程", "电气工程", "计算机"], "minGpa": 82, "minLang": "german_b2" },
+  { "name": "柏林工业大学 (TU Berlin)", "type": "TU9", "tier": "A", "majors": ["计算机", "机械工程", "电气工程"], "minGpa": 80, "minLang": "german_b2" },
+  { "name": "卡尔斯鲁厄理工学院 (KIT)", "type": "TU9", "tier": "A", "majors": ["计算机", "机械工程", "电气工程"], "minGpa": 80, "minLang": "german_b2" },
+  { "name": "斯图加特大学", "type": "TU9", "tier": "A", "majors": ["机械工程", "电气工程"], "minGpa": 78, "minLang": "german_b2" },
+  { "name": "达姆施塔特工业大学", "type": "TU9", "tier": "A", "majors": ["计算机", "机械工程", "电气工程"], "minGpa": 78, "minLang": "german_b2" },
+  { "name": "德累斯顿工业大学", "type": "TU9", "tier": "B", "majors": ["机械工程", "电气工程", "计算机"], "minGpa": 75, "minLang": "german_b2" },
+  { "name": "汉诺威大学", "type": "TU9", "tier": "B", "majors": ["机械工程", "电气工程"], "minGpa": 75, "minLang": "german_b2" },
+  { "name": "布伦瑞克工业大学", "type": "TU9", "tier": "B", "majors": ["机械工程", "电气工程"], "minGpa": 75, "minLang": "german_b2" },
+  { "name": "海德堡大学", "type": "Elite", "tier": "S", "majors": ["医学", "法学", "经济学", "计算机"], "minGpa": 85, "minLang": "german_c1" },
+  { "name": "慕尼黑大学 (LMU)", "type": "Elite", "tier": "S", "majors": ["经济学", "商科", "法学", "计算机"], "minGpa": 85, "minLang": "german_c1" },
+  { "name": "曼海姆大学", "type": "Elite", "tier": "A", "majors": ["经济学", "商科"], "minGpa": 85, "minLang": "german_b2" },
+  { "name": "科隆大学", "type": "Elite", "tier": "B", "majors": ["经济学", "商科"], "minGpa": 80, "minLang": "german_b2" },
+  { "name": "法兰克福大学", "type": "Comprehensive", "tier": "A", "majors": ["经济学", "商科", "法学"], "minGpa": 80, "minLang": "german_b2" },
+  { "name": "柏林洪堡大学", "type": "Elite", "tier": "S", "majors": ["经济学", "计算机"], "minGpa": 82, "minLang": "german_c1" },
+  { "name": "柏林自由大学", "type": "Elite", "tier": "A", "majors": ["计算机", "经济学"], "minGpa": 80, "minLang": "german_c1" },
+  { "name": "波恩大学", "type": "Elite", "tier": "S", "majors": ["经济学", "计算机"], "minGpa": 82, "minLang": "german_c1" },
+  { "name": "弗赖堡大学", "type": "Elite", "tier": "A", "majors": ["机械工程", "电气工程"], "minGpa": 78, "minLang": "german_b2" },
+  { "name": "哥廷根大学", "type": "Comprehensive", "tier": "A", "majors": ["经济学", "商科"], "minGpa": 78, "minLang": "german_b2" },
+  { "name": "汉堡大学", "type": "Elite", "tier": "B", "majors": ["计算机", "经济学", "商科"], "minGpa": 78, "minLang": "german_b2" },
+  { "name": "波鸿鲁尔大学", "type": "Comprehensive", "tier": "B", "majors": ["机械工程", "电气工程", "计算机"], "minGpa": 75, "minLang": "german_b2" },
+  { "name": "多特蒙德工业大学", "type": "TU", "tier": "B", "majors": ["机械工程", "电气工程", "计算机"], "minGpa": 75, "minLang": "german_b2" },
+  { "name": "纽伦堡大学", "type": "Comprehensive", "tier": "B", "majors": ["机械工程", "电气工程", "经济学"], "minGpa": 75, "minLang": "german_b2" },
+  { "name": "维尔茨堡大学", "type": "Comprehensive", "tier": "B", "majors": ["计算机", "经济学"], "minGpa": 75, "minLang": "german_b2" },
+  { "name": "帕德博恩大学", "type": "Comprehensive", "tier": "C", "majors": ["计算机", "机械工程"], "minGpa": 70, "minLang": "german_b2" },
+  { "name": "锡根大学", "type": "Comprehensive", "tier": "C", "majors": ["机械工程", "电气工程"], "minGpa": 70, "minLang": "german_b1" },
+  { "name": "卡塞尔大学", "type": "Comprehensive", "tier": "C", "majors": ["机械工程", "电气工程"], "minGpa": 70, "minLang": "german_b1" },
+  { "name": "凯泽斯劳滕工业大学", "type": "TU", "tier": "C", "majors": ["计算机", "机械工程", "电气工程"], "minGpa": 70, "minLang": "german_b1" },
+  { "name": "克劳斯塔尔工业大学", "type": "TU", "tier": "C", "majors": ["机械工程", "电气工程"], "minGpa": 65, "minLang": "german_b1" },
+  { "name": "马格德堡大学", "type": "Comprehensive", "tier": "C", "majors": ["机械工程", "电气工程", "计算机"], "minGpa": 65, "minLang": "german_b1" }
 ]
