@@ -51,7 +51,7 @@ export const Experts: React.FC = () => {
                 <img 
                   src={expert.image} 
                   alt={expert.name} 
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 grayscale group-hover:grayscale-0"
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 grayscale group-hover:grayscale-50"
                   referrerPolicy="no-referrer"
                 />
                 <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-jicai-dark to-transparent h-20"></div>
