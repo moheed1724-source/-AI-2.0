@@ -5,16 +5,12 @@ import path from 'path';
 import { defineConfig } from 'vite'
 // ... 其他原有的 import
 
-export default defineConfig({
-  base: '/-AI-2.0/',  // 重点：添加这一行配置
-  // ... 原有的其他配置保持不变
-})
-
 import {defineConfig, loadEnv} from 'vite';
 
 export default defineConfig(({mode}) => {
   const env = loadEnv(mode, '.', '');
   return {
+    base;'/-AI-2.0/,//
     plugins: [react(), tailwindcss()],
     define: {
       'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
