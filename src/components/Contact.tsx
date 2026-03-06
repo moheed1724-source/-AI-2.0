@@ -42,7 +42,7 @@ export const Contact: React.FC = () => {
           <div className="flex flex-col items-center md:items-end">
              <div className="bg-white p-4 rounded-xl max-w-[200px]">
                 <img 
-                  src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://u.wechat.com/EAvk-7_777777" 
+                  src="qr-code.png" 
                   alt="WeChat QR Code" 
                   className="w-full h-full"
                   referrerPolicy="no-referrer"
