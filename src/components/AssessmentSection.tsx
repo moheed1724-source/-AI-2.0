@@ -1,13 +1,17 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { calculateScore, UserInput, AssessmentResult } from '../utils/scoring';
-import { Lock, X, BarChart3 } from 'lucide-react';
+import { Lock, X, BarChart3, CheckCircle } from 'lucide-react';
 
 export const AssessmentSection: React.FC = () => {
   const [step, setStep] = useState<'form' | 'result'>('form');
   const [loading, setLoading] = useState(false);
   const [showFullReport, setShowFullReport] = useState(false);
   const [result, setResult] = useState<AssessmentResult | null>(null);
+  
+  // 新增的状态：控制弹窗里的提交和成功界面
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [contactSubmitted, setContactSubmitted] = useState(false);
 
   const [formData, setFormData] = useState<UserInput & { contact: string }>({
     degree: 'master',
@@ -23,13 +27,29 @@ export const AssessmentSection: React.FC = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = async () => {
+  // 🌟 动作 1：纯粹的 AI 评估（不收集信息，不提交表单）
+  const handleGenerate = () => {
+    setLoading(true);
+    // 模拟 AI 运算时间，增加真实感
+    setTimeout(() => {
+      const scoreResult = calculateScore(formData as UserInput);
+      setResult(scoreResult);
+      setLoading(false);
+      setStep('result');
+      
+      // 评估完成后，延迟 2.5 秒自动弹出“解锁完整报告”的留资窗口
+      setTimeout(() => setShowFullReport(true), 2500);
+    }, 1500); 
+  };
+
+  // 🌟 动作 2：用户在弹窗里输入联系方式并获取报告（此时才偷偷调用 Web3Forms）
+  const submitLead = async () => {
     if (!formData.contact) {
-      alert("请填写您的微信号或手机号，以便为您发送详细报告！");
+      alert("请输入您的手机号或微信号！");
       return;
     }
 
-    setLoading(true);
+    setIsSubmitting(true);
 
     try {
       const response = await fetch('https://api.web3forms.com/submit', {
@@ -51,19 +71,14 @@ export const AssessmentSection: React.FC = () => {
       });
 
       if (response.ok) {
-        alert("🎉 提交成功！我们的顾问已收到您的信息，将尽快与您联系。");
+        // 提交成功，让弹窗变成打勾的成功状态
+        setContactSubmitted(true);
       }
     } catch (error) {
-      console.error("提交表单失败", error);
+      console.error("提交失败", error);
     }
 
-    setTimeout(() => {
-      const scoreResult = calculateScore(formData as UserInput);
-      setResult(scoreResult);
-      setLoading(false);
-      setStep('result');
-      setTimeout(() => setShowFullReport(true), 2000);
-    }, 800);
+    setIsSubmitting(false);
   };
 
   return (
@@ -84,7 +99,7 @@ export const AssessmentSection: React.FC = () => {
             {step === 'form' ? (
               <motion.div key="form" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="p-8 md:p-12">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  {/* 左侧表单 */}
+                  {/* 左侧：背景信息 */}
                   <div className="space-y-6">
                     <div>
                       <label className="block text-sm font-medium text-gray-400 mb-2">申请学位</label>
@@ -111,7 +126,7 @@ export const AssessmentSection: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* 右侧表单 */}
+                  {/* 右侧：意向信息（去掉了原本的手机号填写，让它看起来像个纯粹的工具） */}
                   <div className="space-y-6">
                     <div>
                       <label className="block text-sm font-medium text-gray-400 mb-2">目标专业</label>
@@ -126,26 +141,27 @@ export const AssessmentSection: React.FC = () => {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-400 mb-2">您的手机号或微信号 <span className="text-red-500">*</span></label>
-                      <input
-                        type="text"
-                        placeholder="用于接收完整评估报告"
-                        value={formData.contact}
-                        onChange={(e) => handleInputChange('contact', e.target.value)}
-                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-jicai-blue transition-colors placeholder-gray-600"
-                      />
+                      <label className="block text-sm font-medium text-gray-400 mb-2">意向城市</label>
+                      <div className="flex flex-wrap gap-2">
+                        {['不限', '慕尼黑', '柏林', '亚琛'].map((city) => (
+                          <button key={city} onClick={() => handleInputChange('city', city)} className={`px-4 py-2 rounded-lg text-sm border transition-all ${formData.city === city ? 'bg-jicai-blue/20 border-jicai-blue text-jicai-blue' : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'}`}>
+                            {city}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 <div className="mt-10">
-                  <button onClick={handleSubmit} disabled={loading} className="w-full bg-jicai-blue hover:bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
-                    {loading ? '正在运算并生成报告...' : '免费生成 AI 评估报告'}
+                  <button onClick={handleGenerate} disabled={loading} className="w-full bg-jicai-blue hover:bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
+                    {loading ? 'AI 正在分析您的背景...' : '开始 AI 评估'}
                   </button>
                 </div>
               </motion.div>
             ) : (
               <motion.div key="result" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="p-8 md:p-12">
+                {/* 报告结果展示 */}
                 <div className="flex flex-col md:flex-row items-center justify-between mb-10 gap-6">
                   <div className="flex items-center gap-6">
                     <div className="relative">
@@ -159,7 +175,7 @@ export const AssessmentSection: React.FC = () => {
                       </div>
                     </div>
                     <div>
-                      <h3 className="text-2xl font-bold text-white mb-1">评估完成</h3>
+                      <h3 className="text-2xl font-bold text-white mb-1">评估已完成</h3>
                       <p className="text-gray-400 max-w-xs">{result?.suggestion}</p>
                     </div>
                   </div>
@@ -167,7 +183,7 @@ export const AssessmentSection: React.FC = () => {
 
                 <div className="space-y-4 mb-8">
                   <h4 className="text-lg font-bold text-white flex items-center gap-2">
-                    <BarChart3 size={20} className="text-jicai-blue" /> 院校录取概率预测
+                    <BarChart3 size={20} className="text-jicai-blue" /> 初步录取概率预测
                   </h4>
                   {result?.predictions.map((pred, i) => (
                     <motion.div key={i} className="bg-white/5 border border-white/10 rounded-xl p-4 hover:bg-white/10 transition-colors">
@@ -184,19 +200,23 @@ export const AssessmentSection: React.FC = () => {
                   ))}
                 </div>
 
-                <div className="bg-gradient-to-r from-jicai-blue/20 to-purple-500/20 rounded-xl p-6 border border-white/10 text-center">
-                  <div className="flex flex-col items-center gap-4">
-                    <div className="p-3 bg-white/10 rounded-full"><Lock className="text-gray-400" size={24} /></div>
+                {/* 报告底部的解锁模块 */}
+                <div className="bg-gradient-to-r from-jicai-blue/20 to-purple-500/20 rounded-xl p-6 border border-white/10 text-center relative overflow-hidden">
+                  <div className="absolute inset-0 backdrop-blur-sm bg-black/20 z-0"></div>
+                  <div className="relative z-10 flex flex-col items-center gap-4">
+                    <div className="p-3 bg-white/10 rounded-full"><Lock className="text-white" size={24} /></div>
                     <div>
-                      <h4 className="text-white font-bold mb-1">解锁完整留学方案</h4>
-                      <p className="text-gray-400 text-sm">顾问老师已收到您的信息，将尽快通过微信/手机联系您</p>
+                      <h4 className="text-white font-bold mb-1">解锁您的完整留德规划</h4>
+                      <p className="text-gray-300 text-sm">包含详细的背景提升建议、同等条件真实成功案例</p>
                     </div>
-                    <button onClick={() => setShowFullReport(true)} className="bg-white text-jicai-black font-bold py-3 px-8 rounded-lg hover:bg-gray-200 transition-colors shadow-lg">直接扫码添加顾问</button>
+                    <button onClick={() => setShowFullReport(true)} className="bg-white text-jicai-black font-bold py-3 px-8 rounded-lg hover:bg-gray-200 transition-colors shadow-lg shadow-white/20">
+                      输入联系方式，免费获取报告
+                    </button>
                   </div>
                 </div>
 
                 <div className="mt-8 text-center">
-                  <button onClick={() => setStep('form')} className="text-gray-500 hover:text-white text-sm underline">返回重新填写</button>
+                  <button onClick={() => { setStep('form'); setContactSubmitted(false); }} className="text-gray-500 hover:text-white text-sm underline">返回重新评估</button>
                 </div>
               </motion.div>
             )}
@@ -204,24 +224,60 @@ export const AssessmentSection: React.FC = () => {
         </div>
       </div>
 
-      {/* 扫码弹窗 */}
+      {/* 🌟 全新的引流与提交弹窗：盖在报告上 */}
       <AnimatePresence>
         {showFullReport && (
           <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowFullReport(false)} className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
             <motion.div initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }} className="relative bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl z-10">
               <button onClick={() => setShowFullReport(false)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><X size={24} /></button>
-              <div className="text-center">
-                <h3 className="text-2xl font-bold text-jicai-black mb-2">获取一对一规划</h3>
-                <div className="bg-gray-100 p-4 rounded-xl inline-block mb-4 mt-4">
-                  <div className="w-48 h-48 bg-white flex items-center justify-center rounded-lg border border-gray-200">
-                     <img src="/qrcode.png" alt="WeChat QR Code" className="w-full h-full object-contain" referrerPolicy="no-referrer" />
+              
+              {!contactSubmitted ? (
+                // 状态一：要求用户填写信息以解锁报告
+                <div className="text-center">
+                  <h3 className="text-2xl font-bold text-jicai-black mb-2">获取详细评估报告</h3>
+                  <p className="text-gray-600 mb-6 text-sm">AI 已为您生成初步结果。请输入联系方式，解锁完整的录取概率分析与专家一对一规划。</p>
+                  
+                  <div className="mb-6 text-left">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">手机号或微信号 <span className="text-red-500">*</span></label>
+                    <input
+                      type="text"
+                      placeholder="用于接收完整报告"
+                      value={formData.contact}
+                      onChange={(e) => handleInputChange('contact', e.target.value)}
+                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-800 focus:outline-none focus:border-jicai-blue transition-colors"
+                    />
+                  </div>
+                  
+                  <button 
+                    onClick={submitLead} 
+                    disabled={isSubmitting} 
+                    className="w-full bg-jicai-blue hover:bg-blue-600 text-white font-bold py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2"
+                  >
+                    {isSubmitting ? '正在安全提交...' : '立即获取完整报告'}
+                  </button>
+                </div>
+              ) : (
+                // 状态二：提交成功后的界面
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <CheckCircle className="text-green-500" size={32} />
+                  </div>
+                  <h3 className="text-2xl font-bold text-jicai-black mb-2">报告已生成！</h3>
+                  <p className="text-gray-600 mb-6 text-sm">您的专属顾问已收到评估数据，将尽快联系您发送完整方案。</p>
+                  
+                  <div className="bg-gray-50 p-4 rounded-xl inline-block mb-4 border border-gray-100">
+                    <div className="w-40 h-40 bg-white flex items-center justify-center rounded-lg border border-gray-200 mx-auto">
+                       <img src="/qrcode.png" alt="WeChat QR Code" className="w-full h-full object-contain" referrerPolicy="no-referrer" />
+                    </div>
+                  </div>
+                  <div className="space-y-1 text-sm text-gray-500">
+                    <p>您也可以主动扫码添加顾问</p>
+                    <p className="font-bold text-jicai-blue">微信: jicaixiaokefu</p>
                   </div>
                 </div>
-                <div className="space-y-2 text-sm text-gray-600">
-                  <p className="font-bold text-jicai-blue">微信: jicaixiaokefu</p>
-                </div>
-              </div>
+              )}
+
             </motion.div>
           </div>
         )}
