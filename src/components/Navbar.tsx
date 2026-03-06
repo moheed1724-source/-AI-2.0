@@ -21,9 +21,13 @@ export const Navbar: React.FC<NavbarProps> = ({ scrollToSection }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex-shrink-0 flex items-center gap-2 cursor-pointer" onClick={() => scrollToSection('home')}>
-            <div className="w-8 h-8 bg-jicai-blue rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-xl">J</span>
-            </div>
+            {/* 重点修改：这里换成了你的 logo.png */}
+            <img 
+              src="./logo.png" 
+              alt="济才德国留学 Logo" 
+              className="h-10 w-auto object-contain"
+            />
+            {/* 如果你的 logo 已经自带文字，可以把下面这一行删掉 */}
             <span className="text-white font-bold text-lg tracking-wider">济才德国留学</span>
           </div>
           <div className="hidden md:block">
@@ -40,7 +44,6 @@ export const Navbar: React.FC<NavbarProps> = ({ scrollToSection }) => {
             </div>
           </div>
           <div className="md:hidden">
-            {/* Mobile menu button placeholder - for simplicity in this demo we'll focus on desktop primarily but keep structure */}
             <button className="text-gray-300 hover:text-white p-2">
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
