@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { calculateScore, UserInput, AssessmentResult } from '../utils/scoring';
-import { CheckCircle, AlertCircle, Lock, X } from 'lucide-react';
+import { CheckCircle, AlertCircle, Lock, X, TrendingUp, BarChart3 } from 'lucide-react';
 
 export const AssessmentSection: React.FC = () => {
   const [step, setStep] = useState<'form' | 'result'>('form');
@@ -29,6 +29,8 @@ export const AssessmentSection: React.FC = () => {
       setResult(scoreResult);
       setLoading(false);
       setStep('result');
+      // Auto show full report popup after a short delay to increase conversion
+      setTimeout(() => setShowFullReport(true), 2000);
     }, 1500); // Simulate AI processing time
   };
 
@@ -204,68 +206,114 @@ export const AssessmentSection: React.FC = () => {
                 animate={{ opacity: 1, scale: 1 }}
                 className="p-8 md:p-12"
               >
-                <div className="text-center mb-10">
-                  <div className="inline-flex items-center justify-center w-24 h-24 rounded-full border-4 border-jicai-blue mb-4 relative">
-                    <span className="text-4xl font-bold text-white">{result?.score}</span>
-                    <span className="absolute -top-2 -right-2 bg-green-500 text-black text-xs font-bold px-2 py-1 rounded-full">AI Score</span>
+                <div className="flex flex-col md:flex-row items-center justify-between mb-10 gap-6">
+                  <div className="flex items-center gap-6">
+                    <div className="relative">
+                      <svg className="w-32 h-32 transform -rotate-90">
+                        <circle
+                          className="text-gray-700"
+                          strokeWidth="8"
+                          stroke="currentColor"
+                          fill="transparent"
+                          r="58"
+                          cx="64"
+                          cy="64"
+                        />
+                        <circle
+                          className="text-jicai-blue"
+                          strokeWidth="8"
+                          strokeDasharray={365}
+                          strokeDashoffset={365 - (365 * (result?.score || 0)) / 100}
+                          strokeLinecap="round"
+                          stroke="currentColor"
+                          fill="transparent"
+                          r="58"
+                          cx="64"
+                          cy="64"
+                        />
+                      </svg>
+                      <div className="absolute top-0 left-0 w-full h-full flex flex-col items-center justify-center">
+                        <span className="text-3xl font-bold text-white">{result?.score}</span>
+                        <span className="text-xs text-gray-400">竞争力评分</span>
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-bold text-white mb-1">评估完成</h3>
+                      <p className="text-gray-400 max-w-xs">{result?.suggestion}</p>
+                    </div>
                   </div>
-                  <h3 className="text-2xl font-bold text-white">申请竞争力评估</h3>
-                  <p className="text-gray-400 mt-2">{result?.suggestion}</p>
+                  
+                  <div className="flex gap-4">
+                    <div className="text-center px-4 py-2 bg-white/5 rounded-lg border border-white/10">
+                      <div className="text-xs text-gray-500 uppercase mb-1">申请难度</div>
+                      <div className="text-white font-bold">
+                        {result?.score && result.score > 80 ? '中等' : '较高'}
+                      </div>
+                    </div>
+                    <div className="text-center px-4 py-2 bg-white/5 rounded-lg border border-white/10">
+                      <div className="text-xs text-gray-500 uppercase mb-1">竞争指数</div>
+                      <div className="text-jicai-blue font-bold">Top {100 - (result?.score || 0)}%</div>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                  {/* Reach */}
-                  <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-6">
-                    <div className="flex items-center gap-2 mb-4 text-red-400">
-                      <AlertCircle size={20} />
-                      <span className="font-bold uppercase tracking-wider text-sm">冲刺院校</span>
-                    </div>
-                    <ul className="space-y-2">
-                      {result?.reach.map((uni, i) => (
-                        <li key={i} className="text-white font-medium">{uni}</li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  {/* Match */}
-                  <div className="bg-jicai-blue/10 border border-jicai-blue/20 rounded-xl p-6">
-                    <div className="flex items-center gap-2 mb-4 text-jicai-blue">
-                      <CheckCircle size={20} />
-                      <span className="font-bold uppercase tracking-wider text-sm">匹配院校</span>
-                    </div>
-                    <ul className="space-y-2">
-                      {result?.match.map((uni, i) => (
-                        <li key={i} className="text-white font-medium">{uni}</li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  {/* Safety */}
-                  <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-6">
-                    <div className="flex items-center gap-2 mb-4 text-green-400">
-                      <CheckCircle size={20} />
-                      <span className="font-bold uppercase tracking-wider text-sm">保底院校</span>
-                    </div>
-                    <ul className="space-y-2">
-                      {result?.safety.map((uni, i) => (
-                        <li key={i} className="text-white font-medium">{uni}</li>
-                      ))}
-                    </ul>
-                  </div>
+                <div className="space-y-4 mb-8">
+                  <h4 className="text-lg font-bold text-white flex items-center gap-2">
+                    <BarChart3 size={20} className="text-jicai-blue" />
+                    院校录取概率预测
+                  </h4>
+                  
+                  {result?.predictions.map((pred, i) => (
+                    <motion.div 
+                      key={i}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.1 }}
+                      className="bg-white/5 border border-white/10 rounded-xl p-4 hover:bg-white/10 transition-colors"
+                    >
+                      <div className="flex justify-between items-center mb-2">
+                        <div className="flex items-center gap-3">
+                          <span className={`w-2 h-2 rounded-full ${
+                            pred.type === 'reach' ? 'bg-red-500' : 
+                            pred.type === 'match' ? 'bg-jicai-blue' : 'bg-green-500'
+                          }`}></span>
+                          <span className="font-bold text-white">{pred.name}</span>
+                          <span className={`text-xs px-2 py-0.5 rounded border ${
+                            pred.type === 'reach' ? 'border-red-500/30 text-red-400' : 
+                            pred.type === 'match' ? 'border-blue-500/30 text-blue-400' : 'border-green-500/30 text-green-400'
+                          }`}>
+                            {pred.type === 'reach' ? '冲刺' : pred.type === 'match' ? '匹配' : '保底'}
+                          </span>
+                        </div>
+                        <span className="font-bold text-white">{pred.probability}%</span>
+                      </div>
+                      <div className="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
+                        <motion.div 
+                          initial={{ width: 0 }}
+                          animate={{ width: `${pred.probability}%` }}
+                          transition={{ duration: 1, delay: 0.5 + i * 0.1 }}
+                          className={`h-full rounded-full ${
+                            pred.probability < 40 ? 'bg-red-500' : 
+                            pred.probability < 70 ? 'bg-jicai-blue' : 'bg-green-500'
+                          }`}
+                        ></motion.div>
+                      </div>
+                    </motion.div>
+                  ))}
                 </div>
 
-                <div className="bg-white/5 rounded-xl p-6 border border-white/10 text-center">
+                <div className="bg-gradient-to-r from-jicai-blue/20 to-purple-500/20 rounded-xl p-6 border border-white/10 text-center">
                   <div className="flex flex-col items-center gap-4">
                     <div className="p-3 bg-white/10 rounded-full">
                       <Lock className="text-gray-400" size={24} />
                     </div>
                     <div>
                       <h4 className="text-white font-bold mb-1">解锁完整留学方案</h4>
-                      <p className="text-gray-400 text-sm">查看详细录取概率分析 + 真实成功案例 + 个性化选校建议</p>
+                      <p className="text-gray-400 text-sm">查看详细背景提升建议 + 真实成功案例 + 个性化选校建议</p>
                     </div>
                     <button 
                       onClick={() => setShowFullReport(true)}
-                      className="bg-white text-jicai-black font-bold py-3 px-8 rounded-lg hover:bg-gray-200 transition-colors"
+                      className="bg-white text-jicai-black font-bold py-3 px-8 rounded-lg hover:bg-gray-200 transition-colors shadow-lg"
                     >
                       获取完整报告
                     </button>
@@ -311,8 +359,8 @@ export const AssessmentSection: React.FC = () => {
               </button>
               
               <div className="text-center">
-                <h3 className="text-2xl font-bold text-jicai-black mb-2">获取完整留学方案</h3>
-                <p className="text-gray-600 mb-6">扫码添加顾问，免费获取详细报告</p>
+                <h3 className="text-2xl font-bold text-jicai-black mb-2">扫码获取完整德国留学规划</h3>
+                <p className="text-gray-600 mb-6">获取详细录取概率分析 + 真实成功案例</p>
                 
                 <div className="bg-gray-100 p-4 rounded-xl inline-block mb-4">
                   {/* Placeholder for QR Code */}

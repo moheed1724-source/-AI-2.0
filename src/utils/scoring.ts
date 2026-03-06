@@ -1,8 +1,10 @@
 export interface AssessmentResult {
   score: number;
-  reach: string[];
-  match: string[];
-  safety: string[];
+  predictions: {
+    name: string;
+    probability: number;
+    type: 'reach' | 'match' | 'safety';
+  }[];
   suggestion: string;
 }
 
@@ -45,31 +47,61 @@ export const calculateScore = (input: UserInput): AssessmentResult => {
     case 'tier2': score += 12; break;
   }
 
-  // Filter Universities based on Major and Score
-  // Note: This is a simplified logic. Real logic would be more complex.
+  // Bonus for matching city preference (slight adjustment to score context if needed, but keeping simple for now)
+
+  // Filter Universities based on Major
   const relevantUnis = universitiesData.filter(uni => 
     uni.majors.includes(input.major) || uni.majors.some(m => input.major.includes(m))
   );
 
-  const reach = relevantUnis.filter(uni => uni.minScore > score && uni.minScore <= score + 10).map(u => u.name);
-  const match = relevantUnis.filter(uni => uni.minScore <= score && uni.minScore > score - 10).map(u => u.name);
-  const safety = relevantUnis.filter(uni => uni.minScore <= score - 10).map(u => u.name);
+  // Generate Predictions
+  const predictions = relevantUnis.map(uni => {
+    // Calculate probability based on score difference
+    // If score == minScore, prob is 50%
+    // If score > minScore, prob increases
+    // If score < minScore, prob decreases
+    let diff = score - uni.minScore;
+    let prob = 50 + (diff * 2); 
+    
+    // Cap probability
+    if (prob > 95) prob = 95;
+    if (prob < 10) prob = 10;
 
-  // Fallbacks if lists are empty (just for demo purposes to ensure UI looks good)
-  if (reach.length === 0) reach.push("慕尼黑工业大学 (冲刺尝试)", "海德堡大学 (冲刺尝试)");
-  if (match.length === 0) match.push("汉诺威大学", "不莱梅大学");
-  if (safety.length === 0) safety.push("克劳斯塔尔工业大学", "开姆尼茨工业大学");
+    let type: 'reach' | 'match' | 'safety';
+    if (prob < 40) type = 'reach';
+    else if (prob < 75) type = 'match';
+    else type = 'safety';
+
+    return {
+      name: uni.name,
+      probability: prob,
+      type
+    };
+  }).sort((a, b) => b.probability - a.probability); // Sort by probability descending? Or maybe group by type.
+
+  // Select a mix for display
+  const displayPredictions = [
+    ...predictions.filter(p => p.type === 'reach').slice(0, 2),
+    ...predictions.filter(p => p.type === 'match').slice(0, 2),
+    ...predictions.filter(p => p.type === 'safety').slice(0, 2)
+  ];
+  
+  // If we don't have enough, fill with some defaults just for demo robustness
+  if (displayPredictions.length < 3) {
+     if (!displayPredictions.some(p => p.name.includes("慕尼黑"))) 
+        displayPredictions.push({ name: "慕尼黑工业大学", probability: 35, type: 'reach' });
+     if (!displayPredictions.some(p => p.name.includes("亚琛"))) 
+        displayPredictions.push({ name: "亚琛工业大学", probability: 45, type: 'match' });
+  }
 
   let suggestion = "";
   if (score < 70) suggestion = "建议重点提升GPA和语言成绩，可以考虑申请预科或语言班过渡。";
   else if (score < 80) suggestion = "您的背景不错，建议将德语提升至C1或雅思7.0，可以冲击TU9院校。";
-  else suggestion = "您的背景非常优秀，完全有能力申请德国顶尖名校，建议准备高质量的文书。";
+  else suggestion = "您的背景非常优秀，完全有能力申请德国顶尖名校，建议准备高质量的文书以突出科研经历。";
 
   return {
     score,
-    reach: reach.slice(0, 2),
-    match: match.slice(0, 2),
-    safety: safety.slice(0, 2),
+    predictions: displayPredictions.sort((a, b) => a.probability - b.probability), // Sort low to high for display usually? Or high to low. Let's do by type in UI.
     suggestion
   };
 };

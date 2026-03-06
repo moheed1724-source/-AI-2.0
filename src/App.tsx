@@ -8,6 +8,7 @@ import { Timeline } from './components/Timeline';
 import { SuccessStories } from './components/SuccessStories';
 import { Experts } from './components/Experts';
 import { Contact } from './components/Contact';
+import { FloatingConsultation } from './components/FloatingConsultation';
 
 export default function App() {
   const scrollToSection = (id: string) => {
@@ -28,6 +29,7 @@ export default function App() {
       <SuccessStories />
       <Experts />
       <Contact />
+      <FloatingConsultation />
     </div>
   );
 }
