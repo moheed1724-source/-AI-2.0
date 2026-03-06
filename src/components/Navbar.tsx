@@ -1,5 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
+// 🌟 重点在这里：我们用代码把上一层文件夹(../)里的 logo 导进来
+import logoImg from '../logo.png'; 
 
 interface NavbarProps {
   scrollToSection: (id: string) => void;
@@ -21,14 +23,12 @@ export const Navbar: React.FC<NavbarProps> = ({ scrollToSection }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex-shrink-0 flex items-center gap-2 cursor-pointer" onClick={() => scrollToSection('home')}>
-            {/* 重点修改：这里换成了你的 logo.png */}
+            {/* 🌟 重点在这里：直接使用导入的 logoImg 变量 */}
             <img 
-              src="/logo.png" 
+              src={logoImg} 
               alt="济才德国留学 Logo" 
               className="h-10 w-auto object-contain"
             />
-            {/* 如果你的 logo 已经自带文字，可以把下面这一行删掉 */}
-            <span className="text-white font-bold text-lg tracking-wider">济才德国留学</span>
           </div>
           <div className="hidden md:block">
             <div className="ml-10 flex items-baseline space-x-4">
