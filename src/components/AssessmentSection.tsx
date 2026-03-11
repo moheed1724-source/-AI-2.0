@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { calculateScore, UserInput, AssessmentResult } from '../utils/scoring';
-import { Lock, X, BarChart3, CheckCircle } from 'lucide-react';
+import { Lock, X, BarChart3, CheckCircle, AlertTriangle } from 'lucide-react';
 
 export const AssessmentSection: React.FC = () => {
   const [step, setStep] = useState<'form' | 'result'>('form');
   const [loading, setLoading] = useState(false);
+  const [loadingStep, setLoadingStep] = useState(0);
   const [showFullReport, setShowFullReport] = useState(false);
   const [result, setResult] = useState<AssessmentResult | null>(null);
   
-  // 新增的状态：控制弹窗里的提交和成功界面
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [contactSubmitted, setContactSubmitted] = useState(false);
 
@@ -20,6 +20,7 @@ export const AssessmentSection: React.FC = () => {
     major: '机械工程',
     background: '211',
     city: '不限',
+    hasTest: 'no', // 新增的标化考试状态
     contact: ''
   });
 
@@ -27,57 +28,56 @@ export const AssessmentSection: React.FC = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  // 🌟 动作 1：纯粹的 AI 评估（不收集信息，不提交表单）
+  const loadingTexts = [
+    "正在转换您的巴伐利亚算法绩点...",
+    "正在对比慕尼黑工业大学历年 ECTS 核心模块要求...",
+    "正在生成济才内部独家录取概率报表..."
+  ];
+
   const handleGenerate = () => {
     setLoading(true);
-    // 模拟 AI 运算时间，增加真实感
+    setLoadingStep(0);
+
+    // 每隔 1 秒切换一下炫酷的加载文案
+    let currentStep = 0;
+    const interval = setInterval(() => {
+      currentStep += 1;
+      if (currentStep < 3) {
+        setLoadingStep(currentStep);
+      }
+    }, 1000);
+
+    // 3秒后出结果
     setTimeout(() => {
+      clearInterval(interval);
       const scoreResult = calculateScore(formData as UserInput);
       setResult(scoreResult);
       setLoading(false);
       setStep('result');
-      
-      // 评估完成后，延迟 2.5 秒自动弹出“解锁完整报告”的留资窗口
       setTimeout(() => setShowFullReport(true), 2500);
-    }, 1500); 
+    }, 3000); 
   };
 
-  // 🌟 动作 2：用户在弹窗里输入联系方式并获取报告（此时才偷偷调用 Web3Forms）
   const submitLead = async () => {
-    if (!formData.contact) {
-      alert("请输入您的手机号或微信号！");
-      return;
-    }
-
+    if (!formData.contact) return alert("请输入您的手机号或微信号！");
     setIsSubmitting(true);
-
     try {
       const response = await fetch('https://api.web3forms.com/submit', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify({
           access_key: "a531da67-7614-4c7b-992d-e87c02d63ac2",
           '联系方式': formData.contact,
-          '申请学位': formData.degree,
           'GPA': formData.gpa,
           '院校背景': formData.background,
           '目标专业': formData.major,
-          '语言水平': formData.language,
-          '意向城市': formData.city
+          '具备GRE/GMAT': formData.hasTest
         })
       });
-
-      if (response.ok) {
-        // 提交成功，让弹窗变成打勾的成功状态
-        setContactSubmitted(true);
-      }
+      if (response.ok) setContactSubmitted(true);
     } catch (error) {
       console.error("提交失败", error);
     }
-
     setIsSubmitting(false);
   };
 
@@ -90,8 +90,8 @@ export const AssessmentSection: React.FC = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center mb-16">
-          <motion.h2 className="text-3xl md:text-4xl font-bold text-white mb-4">AI 智能评估系统</motion.h2>
-          <motion.p className="text-gray-400 max-w-2xl mx-auto">基于大数据算法，3分钟精准预测您的德国名校录取概率</motion.p>
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">AI 智能评估系统</h2>
+          <p className="text-gray-400 max-w-2xl mx-auto">引入巴伐利亚转换算法，3秒精准预测您的德国名校录取概率</p>
         </div>
 
         <div className="max-w-4xl mx-auto bg-jicai-black/50 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
@@ -99,7 +99,6 @@ export const AssessmentSection: React.FC = () => {
             {step === 'form' ? (
               <motion.div key="form" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="p-8 md:p-12">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  {/* 左侧：背景信息 */}
                   <div className="space-y-6">
                     <div>
                       <label className="block text-sm font-medium text-gray-400 mb-2">申请学位</label>
@@ -112,40 +111,40 @@ export const AssessmentSection: React.FC = () => {
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-400 mb-2">平均分 (GPA/100)</label>
+                      <label className="block text-sm font-medium text-gray-400 mb-2">国内均分 (GPA/100)</label>
                       <input type="range" min="60" max="100" value={formData.gpa} onChange={(e) => handleInputChange('gpa', parseInt(e.target.value))} className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-jicai-blue" />
                       <div className="flex justify-between mt-2 text-sm text-gray-500">
                         <span>60</span><span className="text-jicai-blue font-bold text-lg">{formData.gpa}</span><span>100</span>
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-400 mb-2">院校背景</label>
+                      <label className="block text-sm font-medium text-gray-400 mb-2">国内院校层级</label>
                       <select value={formData.background} onChange={(e) => handleInputChange('background', e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-jicai-blue transition-colors">
                         <option value="985">985 院校</option><option value="211">211 院校</option><option value="tier1">普通一本</option><option value="tier2">二本及其他</option>
                       </select>
                     </div>
                   </div>
 
-                  {/* 右侧：意向信息（去掉了原本的手机号填写，让它看起来像个纯粹的工具） */}
                   <div className="space-y-6">
                     <div>
-                      <label className="block text-sm font-medium text-gray-400 mb-2">目标专业</label>
+                      <label className="block text-sm font-medium text-gray-400 mb-2">目标专业方向</label>
                       <select value={formData.major} onChange={(e) => handleInputChange('major', e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-jicai-blue transition-colors">
                         <option value="机械工程">机械工程</option><option value="计算机">计算机科学</option><option value="电气工程">电气工程</option><option value="商科">商科/管理</option><option value="经济学">经济学</option>
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-400 mb-2">语言水平</label>
+                      <label className="block text-sm font-medium text-gray-400 mb-2">目前语言水平</label>
                       <select value={formData.language} onChange={(e) => handleInputChange('language', e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-jicai-blue transition-colors">
                         <option value="german_c1">德语 TestDaF 4x4 / C1</option><option value="german_b2">德语 B2</option><option value="german_b1">德语 B1</option><option value="ielts_7">雅思 7.0+</option><option value="ielts_6.5">雅思 6.5</option><option value="other">其他 / 暂无</option>
                       </select>
                     </div>
+                    {/* 🌟 新增的标化考试选项 */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-400 mb-2">意向城市</label>
-                      <div className="flex flex-wrap gap-2">
-                        {['不限', '慕尼黑', '柏林', '亚琛'].map((city) => (
-                          <button key={city} onClick={() => handleInputChange('city', city)} className={`px-4 py-2 rounded-lg text-sm border transition-all ${formData.city === city ? 'bg-jicai-blue/20 border-jicai-blue text-jicai-blue' : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'}`}>
-                            {city}
+                      <label className="block text-sm font-medium text-gray-400 mb-2">是否拥有 GRE / GMAT 成绩？</label>
+                      <div className="flex gap-4">
+                        {['yes', 'no'].map((val) => (
+                          <button key={val} onClick={() => handleInputChange('hasTest', val)} className={`flex-1 py-3 px-4 rounded-xl border transition-all ${formData.hasTest === val ? 'bg-jicai-blue/20 border-jicai-blue text-jicai-blue' : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'}`}>
+                            {val === 'yes' ? '是 (有成绩)' : '否 (暂无)'}
                           </button>
                         ))}
                       </div>
@@ -154,14 +153,23 @@ export const AssessmentSection: React.FC = () => {
                 </div>
 
                 <div className="mt-10">
-                  <button onClick={handleGenerate} disabled={loading} className="w-full bg-jicai-blue hover:bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
-                    {loading ? 'AI 正在分析您的背景...' : '开始 AI 评估'}
+                  <button onClick={handleGenerate} disabled={loading} className="w-full bg-jicai-blue hover:bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 relative overflow-hidden">
+                    {loading ? (
+                       <AnimatePresence mode="wait">
+                          <motion.span 
+                            key={loadingStep}
+                            initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
+                            className="text-white/90"
+                          >
+                             {loadingTexts[loadingStep]}
+                          </motion.span>
+                       </AnimatePresence>
+                    ) : '开始精准计算概率'}
                   </button>
                 </div>
               </motion.div>
             ) : (
               <motion.div key="result" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="p-8 md:p-12">
-                {/* 报告结果展示 */}
                 <div className="flex flex-col md:flex-row items-center justify-between mb-10 gap-6">
                   <div className="flex items-center gap-6">
                     <div className="relative">
@@ -171,36 +179,46 @@ export const AssessmentSection: React.FC = () => {
                       </svg>
                       <div className="absolute top-0 left-0 w-full h-full flex flex-col items-center justify-center">
                         <span className="text-3xl font-bold text-white">{result?.score}</span>
-                        <span className="text-xs text-gray-400">竞争力评分</span>
+                        <span className="text-[10px] text-gray-400">综合评估分</span>
                       </div>
                     </div>
                     <div>
                       <h3 className="text-2xl font-bold text-white mb-1">评估已完成</h3>
-                      <p className="text-gray-400 max-w-xs">{result?.suggestion}</p>
+                      <p className="text-gray-400 max-w-xs text-sm leading-relaxed">{result?.suggestion}</p>
                     </div>
                   </div>
                 </div>
 
                 <div className="space-y-4 mb-8">
                   <h4 className="text-lg font-bold text-white flex items-center gap-2">
-                    <BarChart3 size={20} className="text-jicai-blue" /> 初步录取概率预测
+                    <BarChart3 size={20} className="text-jicai-blue" /> 巴伐利亚算法匹配结果
                   </h4>
                   {result?.predictions.map((pred, i) => (
                     <motion.div key={i} className="bg-white/5 border border-white/10 rounded-xl p-4 hover:bg-white/10 transition-colors">
                       <div className="flex justify-between items-center mb-2">
                         <div className="flex items-center gap-3">
                           <span className="font-bold text-white">{pred.name}</span>
+                          <span className={`text-[10px] px-2 py-0.5 rounded-full border ${pred.type === 'reach' ? 'border-red-500/50 text-red-400' : pred.type === 'match' ? 'border-blue-500/50 text-blue-400' : 'border-green-500/50 text-green-400'}`}>
+                            {pred.type === 'reach' ? '冲刺院校' : pred.type === 'match' ? '核心匹配' : '稳妥保底'}
+                          </span>
                         </div>
                         <span className="font-bold text-white">{pred.probability}%</span>
                       </div>
-                      <div className="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
+                      <div className="w-full bg-gray-700 rounded-full h-2 overflow-hidden mb-2">
                         <motion.div animate={{ width: `${pred.probability}%` }} className={`h-full rounded-full ${pred.probability < 40 ? 'bg-red-500' : pred.probability < 70 ? 'bg-jicai-blue' : 'bg-green-500'}`}></motion.div>
                       </div>
+                      
+                      {/* 🌟 触发的 GRE 警告信息展示 */}
+                      {pred.warningMsg && (
+                         <div className="mt-2 text-xs text-red-400 flex items-start gap-1 bg-red-900/20 p-2 rounded border border-red-500/30">
+                            <AlertTriangle size={14} className="shrink-0 mt-0.5" />
+                            <span>{pred.warningMsg}</span>
+                         </div>
+                      )}
                     </motion.div>
                   ))}
                 </div>
 
-                {/* 报告底部的解锁模块 */}
                 <div className="bg-gradient-to-r from-jicai-blue/20 to-purple-500/20 rounded-xl p-6 border border-white/10 text-center relative overflow-hidden">
                   <div className="absolute inset-0 backdrop-blur-sm bg-black/20 z-0"></div>
                   <div className="relative z-10 flex flex-col items-center gap-4">
@@ -224,7 +242,6 @@ export const AssessmentSection: React.FC = () => {
         </div>
       </div>
 
-      {/* 🌟 全新的引流与提交弹窗：盖在报告上 */}
       <AnimatePresence>
         {showFullReport && (
           <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
@@ -233,7 +250,6 @@ export const AssessmentSection: React.FC = () => {
               <button onClick={() => setShowFullReport(false)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><X size={24} /></button>
               
               {!contactSubmitted ? (
-                // 状态一：要求用户填写信息以解锁报告
                 <div className="text-center">
                   <h3 className="text-2xl font-bold text-jicai-black mb-2">获取详细评估报告</h3>
                   <p className="text-gray-600 mb-6 text-sm">AI 已为您生成初步结果。请输入联系方式，解锁完整的录取概率分析与专家一对一规划。</p>
@@ -249,16 +265,11 @@ export const AssessmentSection: React.FC = () => {
                     />
                   </div>
                   
-                  <button 
-                    onClick={submitLead} 
-                    disabled={isSubmitting} 
-                    className="w-full bg-jicai-blue hover:bg-blue-600 text-white font-bold py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2"
-                  >
+                  <button onClick={submitLead} disabled={isSubmitting} className="w-full bg-jicai-blue hover:bg-blue-600 text-white font-bold py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
                     {isSubmitting ? '正在安全提交...' : '立即获取完整报告'}
                   </button>
                 </div>
               ) : (
-                // 状态二：提交成功后的界面
                 <div className="text-center">
                   <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <CheckCircle className="text-green-500" size={32} />
@@ -268,7 +279,7 @@ export const AssessmentSection: React.FC = () => {
                   
                   <div className="bg-gray-50 p-4 rounded-xl inline-block mb-4 border border-gray-100">
                     <div className="w-40 h-40 bg-white flex items-center justify-center rounded-lg border border-gray-200 mx-auto">
-                       <img src="/qrcode.png" alt="WeChat QR Code" className="w-full h-full object-contain" referrerPolicy="no-referrer" />
+                       <img src="qrcode.png" alt="WeChat QR Code" className="w-full h-full object-contain" referrerPolicy="no-referrer" />
                     </div>
                   </div>
                   <div className="space-y-1 text-sm text-gray-500">
@@ -277,7 +288,6 @@ export const AssessmentSection: React.FC = () => {
                   </div>
                 </div>
               )}
-
             </motion.div>
           </div>
         )}
