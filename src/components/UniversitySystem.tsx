@@ -1,16 +1,17 @@
 import React, { useRef, useState, useEffect } from 'react';
 
 const universities = [
-  { name: "慕尼黑工业大学", en: "TU Munich", desc: "德国顶尖理工大学，诺贝尔奖得主摇篮。", image: "tum.jpg", link: "https://baike.baidu.com/item/慕尼黑工业大学" },
-  { name: "亚琛工业大学", en: "RWTH Aachen", desc: "欧洲顶尖理工大学，机械工程专业世界闻名。", image: "RWTH.jpg", link: "https://baike.baidu.com/item/亚琛工业大学" },
-  { name: "海德堡大学", en: "Heidelberg University", desc: "德国最古老的大学，医学与生命科学领域的权威。", image: "Heidelberg.jpg", link: "https://baike.baidu.com/item/海德堡大学" },
-  { name: "柏林工业大学", en: "TU Berlin", desc: "德国最大的工业大学之一，坐落于首都柏林。", image: "tum.jpg", link: "https://baike.baidu.com/item/柏林工业大学" },
-  { name: "卡尔斯鲁厄理工学院", en: "KIT", desc: "德国的MIT，计算机与工程的顶级殿堂。", image: "RWTH.jpg", link: "https://baike.baidu.com/item/卡尔斯鲁厄理工学院" },
-  { name: "慕尼黑大学", en: "LMU Munich", desc: "精英大学联盟成员，商科与文科全德顶尖。", image: "Heidelberg.jpg", link: "https://baike.baidu.com/item/慕尼黑大学" },
-  { name: "斯图加特大学", en: "University of Stuttgart", desc: "位于德国汽车工业中心，汽车与航空工程顶尖。", image: "tum.jpg", link: "https://baike.baidu.com/item/斯图加特大学" },
-  { name: "达姆施塔特工业大学", en: "TU Darmstadt", desc: "TU9成员，计算机与人工智能领域领先。", image: "RWTH.jpg", link: "https://baike.baidu.com/item/达姆施塔特工业大学" },
-  { name: "汉诺威大学", en: "Leibniz University", desc: "以莱布尼茨命名，机械与电气工程实力雄厚。", image: "Heidelberg.jpg", link: "https://baike.baidu.com/item/汉诺威大学" },
-  { name: "科隆大学", en: "University of Cologne", desc: "德国第二大大学，经济系规模全德第一。", image: "tum.jpg", link: "https://baike.baidu.com/item/科隆大学" }
+  // 慕尼黑工大继续使用你本地的 tum.jpg
+ { name: "慕尼黑工业大学", en: "TU Munich", desc: "德国顶尖理工大学，诺贝尔奖得主摇篮。", image: "TU Munich.jpg", link: "https://zh.wikipedia.org/zh-cn/慕尼黑工业大学" },
+  { name: "亚琛工业大学", en: "RWTH Aachen", desc: "欧洲顶尖理工大学，机械工程专业世界闻名。", image: "RWTH Aachen.jpg", link: "https://zh.wikipedia.org/zh-cn/亚琛工业大学" },
+  { name: "海德堡大学", en: "Heidelberg University", desc: "德国最古老的大学，医学与生命科学领域的权威。", image: "Heidelberg University.jpg", link: "https://zh.wikipedia.org/zh-cn/海德堡大学" },
+  { name: "柏林工业大学", en: "TU Berlin", desc: "德国最大的工业大学之一，坐落于首都柏林。", image: "TU Berlin.jpg", link: "https://zh.wikipedia.org/zh-cn/柏林工业大学" },
+  { name: "卡尔斯鲁厄理工学院", en: "KIT", desc: "德国的MIT，计算机与工程的顶级殿堂。", image: "KIT.jpg", link: "https://zh.wikipedia.org/zh-cn/卡尔斯鲁厄理工学院" },
+  { name: "慕尼黑大学", en: "LMU Munich", desc: "精英大学联盟成员，商科与文科全德顶尖。", image: "LMU Munich.jpg", link: "https://zh.wikipedia.org/zh-cn/慕尼黑大学" },
+  { name: "斯图加特大学", en: "University of Stuttgart", desc: "位于德国汽车工业中心，汽车与航空工程顶尖。", image: "University of Stuttgart.jpg", link: "https://zh.wikipedia.org/zh-cn/斯图加特大学" },
+  { name: "达姆施塔特工业大学", en: "TU Darmstadt", desc: "TU9成员，计算机与人工智能领域领先。", image: "TU Darmstadt.jpg", link: "https://zh.wikipedia.org/zh-cn/达姆施塔特工业大学" },
+  { name: "汉诺威大学", en: "Leibniz University", desc: "以莱布尼茨命名，机械与电气工程实力雄厚。", image: "Leibniz University.jpg", link: "https://zh.wikipedia.org/zh-cn/汉诺威大学" },
+  { name: "科隆大学", en: "University of Cologne", desc: "德国第二大大学，经济系规模全德第一。", image: "University of Cologne.jpg", link: "https://zh.wikipedia.org/zh-cn/科隆大学" }
 ];
 
 const duplicatedUniversities = [...universities, ...universities];
@@ -125,10 +126,10 @@ export const UniversitySystem: React.FC = () => {
               draggable="false"
               className="w-[280px] md:w-[320px] shrink-0 group relative overflow-hidden rounded-2xl bg-jicai-dark border border-white/5 hover:border-jicai-blue/50 transition-all block shadow-lg hover:shadow-jicai-blue/10 transform hover:-translate-y-2 flex flex-col"
             >
-              {/* 修改这里：去掉了p-8，加上了 object-cover 让图片铺满 */}
               <div className="h-48 w-full bg-gray-900 overflow-hidden shrink-0">
                 <img 
-                  src={`${basePath}${uni.image}`} 
+                  // 智能判断：如果是 http 开头直接用网络图，如果是本地图则拼接路径
+                  src={uni.image.startsWith('http') ? uni.image : `${basePath}${uni.image}`} 
                   alt={uni.name} 
                   draggable="false"
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 pointer-events-none"
