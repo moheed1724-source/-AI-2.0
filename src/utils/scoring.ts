@@ -4,6 +4,7 @@ export interface AssessmentResult {
     name: string;
     probability: number;
     type: 'reach' | 'match' | 'safety';
+    warningMsg?: string; // 新增的警告字段
   }[];
   suggestion: string;
 }
@@ -15,79 +16,64 @@ export interface UserInput {
   major: string;
   background: '985' | '211' | 'tier1' | 'tier2';
   city: string;
+  hasTest: 'yes' | 'no'; // 新增：是否拥有 GRE/GMAT
 }
 
 import universitiesData from '../data/universities.json';
 
 export const calculateScore = (input: UserInput): AssessmentResult => {
-  let score = 0;
+  // 1. 巴伐利亚算法计算 (德国分数越低越好，最高1.0，及格4.0)
+  let bavarianScore = 1 + 3 * (100 - input.gpa) / 40;
+  bavarianScore = Math.max(1.0, Math.min(4.0, bavarianScore)); // 限制在 1.0 - 4.0 之间
 
-  // 1. 严格的 GPA 计分体系
-  if (input.gpa >= 90) score += 40;
-  else if (input.gpa >= 85) score += 32;
-  else if (input.gpa >= 80) score += 25;
-  else if (input.gpa >= 75) score += 18;
-  else if (input.gpa >= 70) score += 10;
-  else score += 5;
+  // UI 的竞争力总分 (百分制)
+  let score = Math.round(100 - ((bavarianScore - 1) * 33));
+  if (input.background === '985' || input.background === '211') score += 10;
+  if (['german_c1', 'ielts_7'].includes(input.language)) score += 10;
+  score = Math.min(99, score);
 
-  // 2. 语言能力换算体系
-  const langScores: Record<string, number> = {
-    'german_c1': 30, 'ielts_7': 28,
-    'german_b2': 20, 'ielts_6.5': 18,
-    'german_b1': 10, 'other': 0
-  };
-  score += langScores[input.language] || 0;
-
-  // 3. 院校背景加成
-  const bgScores: Record<string, number> = {
-    '985': 20, '211': 18, 'tier1': 12, 'tier2': 8
-  };
-  score += bgScores[input.background] || 0;
-
-  // ================= 智能过滤与匹配逻辑 =================
-
-  // 1. 先筛选出包含该专业的学校
   let relevantUnis = universitiesData.filter(uni => uni.majors.includes(input.major));
-
-  // 如果实在没有该专业的学校（做个保底防崩溃）
   if (relevantUnis.length === 0) {
     relevantUnis = universitiesData.slice(0, 5); 
   }
 
-  // 2. 模拟真正的申请概率计算
   const predictions = relevantUnis.map(uni => {
-    let prob = 50; // 基础概率
+    let prob = 50; 
     
-    // GPA 差距影响
-    let gpaDiff = input.gpa - uni.minGpa;
-    prob += gpaDiff * 3; // 差1分影响3%概率
+    // 绩点优势换算：如果德国分数优于 2.5，加概率；差于 2.5，减概率
+    prob += (2.5 - bavarianScore) * 25; 
 
-    // 语言是否达标影响
-    if (uni.minLang === 'german_c1' && !['german_c1', 'ielts_7'].includes(input.language)) prob -= 25;
-    if (uni.minLang === 'german_b2' && input.language === 'german_b1') prob -= 15;
+    // 语言卡脖子
+    if (uni.minLang === 'german_c1' && !['german_c1', 'ielts_7'].includes(input.language)) prob -= 30;
     if (input.language === 'other') prob -= 40;
 
-    // 背景加成
-    if (uni.tier === 'S' && ['tier1', 'tier2'].includes(input.background)) prob -= 15;
+    // 背景红利：985/211 在德国名校可以弥补部分均分劣势
+    if (input.background === '985' || input.background === '211') prob += 15;
+    if (uni.tier === 'S' && ['tier1', 'tier2'].includes(input.background)) prob -= 20;
 
-    // 城市偏好加分
-    if (input.city !== '不限' && uni.name.includes(input.city)) prob += 10;
+    let warningMsg = "";
+    
+    // 🎯 超级引流点：名校标化考试拦截
+    if (uni.name.includes("慕尼黑工业大学") && input.major === "机械工程" && input.hasTest === 'no') {
+      prob -= 45; // 致命打击
+      warningMsg = "注意：TUM该专业强制要求GRE，点击获取免GRE备选冲刺方案！";
+    }
+    if (uni.name.includes("曼海姆") && (input.major === "商科" || input.major === "经济学") && input.hasTest === 'no') {
+      prob -= 45; 
+      warningMsg = "警告：曼海姆强烈依赖GMAT成绩，建议联系我们获取高分规划。";
+    }
 
-    // 规范概率范围
-    prob = Math.max(5, Math.min(98, prob)); // 限制在 5% - 98% 之间
+    prob = Math.max(5, Math.min(98, prob)); 
 
     let type: 'reach' | 'match' | 'safety';
-    if (prob < 40) type = 'reach'; // 冲刺
-    else if (prob < 75) type = 'match'; // 匹配
-    else type = 'safety'; // 保底
+    if (prob < 40) type = 'reach'; 
+    else if (prob < 75) type = 'match'; 
+    else type = 'safety'; 
 
-    return { name: uni.name, probability: Math.round(prob), type };
+    return { name: uni.name, probability: Math.round(prob), type, warningMsg };
   });
 
-  // 3. 智能挑选 3-4 所代表性学校展示给用户
   const sortedPredictions = predictions.sort((a, b) => b.probability - a.probability);
-  
-  // 尽量挑一个冲刺、一个匹配、一个保底
   const reach = sortedPredictions.find(p => p.type === 'reach');
   const match = sortedPredictions.find(p => p.type === 'match');
   const safety = sortedPredictions.find(p => p.type === 'safety');
@@ -97,28 +83,25 @@ export const calculateScore = (input: UserInput): AssessmentResult => {
   if (match) displayPredictions.push(match);
   if (safety) displayPredictions.push(safety);
   
-  // 补齐到最多4个
   while (displayPredictions.length < 4 && displayPredictions.length < sortedPredictions.length) {
     const nextUni = sortedPredictions.find(p => !displayPredictions.includes(p));
     if (nextUni) displayPredictions.push(nextUni);
     else break;
   }
 
-  // 4. 生成专业评语
   let suggestion = "";
-  if (input.gpa < 75) {
-    suggestion = `您的 GPA 略显单薄。申请 ${input.major} 建议重点通过德语成绩（争取C1）或优质的实习/科研经历来弥补。建议考虑 TU9 之外的宝藏大学。`;
+  if (bavarianScore > 2.8) {
+    suggestion = `根据巴伐利亚算法，您的德国分数为 ${bavarianScore.toFixed(1)}，略显单薄。建议重点通过极高的德语成绩或优质的科研经历来弥补。`;
   } else if (input.language === 'german_b1' || input.language === 'other') {
-    suggestion = `您的学术背景符合要求，但语言是明显短板。建议立即开启密集型语言培训，或考虑提供条件录取的院校。`;
-  } else if (score >= 80) {
-    suggestion = `非常优秀的学术背景！您完全有实力冲击慕尼黑工大或亚琛工大等顶尖名校。建议提早准备动机信与APS审核。`;
+    suggestion = `您的均分折算符合要求，但语言是明显短板。建议立即开启密集型语言培训，获取条件录取资格。`;
+  } else if (bavarianScore <= 1.8) {
+    suggestion = `根据巴伐利亚算法，您的成绩达 ${bavarianScore.toFixed(1)} 分！您完全有实力冲击全德排名前三的理工神校。`;
   } else {
-    suggestion = `您的背景中规中矩，申请 ${input.major} 竞争较激烈。建议采取“冲刺TU9+保底综合性大学”的稳妥策略。`;
+    suggestion = `您的背景中规中矩，申请 ${input.major} 竞争较激烈。建议采取“冲刺TU9+保底精英大学”的稳妥策略。`;
   }
 
   return {
     score,
-    // 按照概率从低到高排序展示（冲刺在最上面，保底在最下面，符合用户心理）
     predictions: displayPredictions.sort((a, b) => a.probability - b.probability),
     suggestion
   };
