@@ -1,65 +1,51 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { calculateScore, UserInput, AssessmentResult } from '../utils/scoring';
-import { Lock, X, BarChart3, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Lock, X, BarChart3, CheckCircle, AlertTriangle, BookOpen, MessageCircle, FileText } from 'lucide-react';
 
 export const AssessmentSection: React.FC = () => {
   const [step, setStep] = useState<'form' | 'result'>('form');
   const [loading, setLoading] = useState(false);
   const [loadingStep, setLoadingStep] = useState(0);
   const [showFullReport, setShowFullReport] = useState(false);
+  const [inquiryContext, setInquiryContext] = useState("获取完整评估报告"); // 动态咨询主题
   const [result, setResult] = useState<AssessmentResult | null>(null);
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [contactSubmitted, setContactSubmitted] = useState(false);
 
-  // 初始化表单状态
   const [formData, setFormData] = useState<UserInput & { contact: string }>({
-    degree: 'master',
-    gpa: 85,
-    language: 'german_b2',
-    major: '机械工程',
-    background: '211',
-    hasTest: 'no',
-    highSchoolType: 'gaokao',
-    highSchoolScore: 'good',
-    contact: ''
+    degree: 'master', gpa: 85, language: 'german_b2', major: '机械工程', background: '211', hasTest: 'no', highSchoolType: 'gaokao', highSchoolScore: 'good', contact: ''
   });
 
-  const handleInputChange = (field: string, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
+  const handleInputChange = (field: string, value: any) => setFormData(prev => ({ ...prev, [field]: value }));
 
-  // 🌟 放慢速度的高逼格文案
   const loadingTexts = [
     "正在建立您的专属学术背景画像...",
     "正在通过巴伐利亚算法转换您的绩点...",
-    "正在对比 TU9 历年核心模块录取大数据...",
-    "正在生成济才独家名校录取概率报表..."
+    "正在全德 50 所主流院校库中进行比对...",
+    "正在生成济才多维录取诊断书..."
   ];
 
   const handleGenerate = () => {
-    setLoading(true);
-    setLoadingStep(0);
-
-    // 🌟 每隔 1.5 秒切换一次文字，让家长看得清
+    setLoading(true); setLoadingStep(0);
     let currentStep = 0;
     const interval = setInterval(() => {
       currentStep += 1;
-      if (currentStep < 4) {
-        setLoadingStep(currentStep);
-      }
+      if (currentStep < 4) setLoadingStep(currentStep);
     }, 1500);
 
-    // 🌟 总耗时延长到 6.5 秒出结果
     setTimeout(() => {
       clearInterval(interval);
-      const scoreResult = calculateScore(formData as UserInput);
-      setResult(scoreResult);
-      setLoading(false);
-      setStep('result');
-      setTimeout(() => setShowFullReport(true), 2500); // 弹窗稍微延迟跳出
+      setResult(calculateScore(formData as UserInput));
+      setLoading(false); setStep('result');
+      setTimeout(() => openLeadModal("获取完整评估与冲刺名单"), 3000);
     }, 6500); 
+  };
+
+  const openLeadModal = (context: string) => {
+    setInquiryContext(context);
+    setShowFullReport(true);
   };
 
   const submitLead = async () => {
@@ -71,19 +57,15 @@ export const AssessmentSection: React.FC = () => {
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify({
           access_key: "a531da67-7614-4c7b-992d-e87c02d63ac2",
+          '咨询意向': inquiryContext,
           '联系方式': formData.contact,
           '申请阶段': formData.degree,
           '目标专业': formData.major,
-          // 提交时根据阶段动态发送不同的数据
-          ...(formData.degree === 'master' 
-            ? { 'GPA': formData.gpa, '院校背景': formData.background, 'GRE/GMAT': formData.hasTest }
-            : { '课程体系': formData.highSchoolType, '预估成绩': formData.highSchoolScore })
+          ...(formData.degree === 'master' ? { 'GPA': formData.gpa, '背景': formData.background } : { '体系': formData.highSchoolType, '预估': formData.highSchoolScore })
         })
       });
       if (response.ok) setContactSubmitted(true);
-    } catch (error) {
-      console.error("提交失败", error);
-    }
+    } catch (error) { console.error(error); }
     setIsSubmitting(false);
   };
 
@@ -97,16 +79,15 @@ export const AssessmentSection: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">AI 智能评估系统</h2>
-          <p className="text-gray-400 max-w-2xl mx-auto">引入巴伐利亚转换算法，多维精准预测您的德国名校录取概率</p>
+          <p className="text-gray-400 max-w-2xl mx-auto">引入巴伐利亚转换算法与50所院校库，多维预测录取概率</p>
         </div>
 
         <div className="max-w-4xl mx-auto bg-jicai-black/50 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
           <AnimatePresence mode="wait">
             {step === 'form' ? (
               <motion.div key="form" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="p-8 md:p-12">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  
-                  {/* ====== 左侧表单列 ====== */}
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  {/* ====== 左侧表单 ====== */}
                   <div className="space-y-6">
                     <div>
                       <label className="block text-sm font-medium text-gray-400 mb-2">申请阶段</label>
@@ -119,15 +100,12 @@ export const AssessmentSection: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* 🌟 动态渲染：如果是硕士显示 GPA 和 院校 */}
                     {formData.degree === 'master' ? (
                       <>
                         <div>
                           <label className="block text-sm font-medium text-gray-400 mb-2">国内均分 (GPA/100)</label>
                           <input type="range" min="60" max="100" value={formData.gpa} onChange={(e) => handleInputChange('gpa', parseInt(e.target.value))} className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-jicai-blue" />
-                          <div className="flex justify-between mt-2 text-sm text-gray-500">
-                            <span>60</span><span className="text-jicai-blue font-bold text-lg">{formData.gpa}</span><span>100</span>
-                          </div>
+                          <div className="flex justify-between mt-2 text-sm text-gray-500"><span>60</span><span className="text-jicai-blue font-bold text-lg">{formData.gpa}</span><span>100</span></div>
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-400 mb-2">国内院校层级</label>
@@ -137,12 +115,11 @@ export const AssessmentSection: React.FC = () => {
                         </div>
                       </>
                     ) : (
-                      /* 🌟 动态渲染：如果是本科显示 高中课程 和 成绩 */
                       <>
                         <div>
                           <label className="block text-sm font-medium text-gray-400 mb-2">目前就读课程体系</label>
                           <select value={formData.highSchoolType} onChange={(e) => handleInputChange('highSchoolType', e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-jicai-blue transition-colors">
-                            <option value="gaokao">普通高中 (高考路线)</option><option value="AL">A-Level 课程</option><option value="IB">IB 课程</option><option value="AP">AP 课程 / 美高</option><option value="OSSD">OSSD / 加高</option>
+                            <option value="gaokao">普通高中 (高考路线)</option><option value="AL">A-Level 课程</option><option value="IB">IB 课程</option><option value="AP">AP 课程</option><option value="OSSD">OSSD / 加高</option>
                           </select>
                         </div>
                         <div>
@@ -155,7 +132,7 @@ export const AssessmentSection: React.FC = () => {
                     )}
                   </div>
 
-                  {/* ====== 右侧表单列 ====== */}
+                  {/* ====== 右侧表单 ====== */}
                   <div className="space-y-6">
                     <div>
                       <label className="block text-sm font-medium text-gray-400 mb-2">目标专业方向</label>
@@ -169,8 +146,6 @@ export const AssessmentSection: React.FC = () => {
                         <option value="german_c1">德语 TestDaF 4x4 / C1</option><option value="german_b2">德语 B2</option><option value="german_b1">德语 B1</option><option value="ielts_7">雅思 7.0+</option><option value="ielts_6.5">雅思 6.5</option><option value="other">其他 / 暂无 / 正在学</option>
                       </select>
                     </div>
-
-                    {/* 🌟 只有硕士阶段才显示 GRE/GMAT 选项 */}
                     {formData.degree === 'master' && (
                       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                         <label className="block text-sm font-medium text-gray-400 mb-2">是否拥有 GRE / GMAT 成绩？</label>
@@ -185,51 +160,52 @@ export const AssessmentSection: React.FC = () => {
                     )}
                   </div>
                 </div>
-
                 <div className="mt-10">
                   <button onClick={handleGenerate} disabled={loading} className="w-full bg-jicai-blue hover:bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 relative overflow-hidden h-16">
                     {loading ? (
-                       <AnimatePresence mode="wait">
-                          <motion.span 
-                            key={loadingStep}
-                            initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -15 }}
-                            transition={{ duration: 0.3 }}
-                            className="text-white/90 text-sm md:text-base font-medium tracking-wide"
-                          >
-                             {loadingTexts[loadingStep]}
-                          </motion.span>
-                       </AnimatePresence>
+                       <AnimatePresence mode="wait"><motion.span key={loadingStep} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -15 }} transition={{ duration: 0.3 }} className="text-white/90 text-sm md:text-base font-medium">{loadingTexts[loadingStep]}</motion.span></AnimatePresence>
                     ) : '开始精准计算概率'}
                   </button>
                 </div>
               </motion.div>
             ) : (
               <motion.div key="result" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="p-8 md:p-12">
-                <div className="flex flex-col md:flex-row items-center justify-between mb-10 gap-6">
+                
+                {/* 报告头部 */}
+                <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-6 border-b border-white/10 pb-8">
                   <div className="flex items-center gap-6">
                     <div className="relative">
-                      <svg className="w-32 h-32 transform -rotate-90">
-                        <circle className="text-gray-700" strokeWidth="8" stroke="currentColor" fill="transparent" r="58" cx="64" cy="64" />
-                        <circle className="text-jicai-blue" strokeWidth="8" strokeDasharray={365} strokeDashoffset={365 - (365 * (result?.score || 0)) / 100} strokeLinecap="round" stroke="currentColor" fill="transparent" r="58" cx="64" cy="64" />
-                      </svg>
-                      <div className="absolute top-0 left-0 w-full h-full flex flex-col items-center justify-center">
-                        <span className="text-3xl font-bold text-white">{result?.score}</span>
-                        <span className="text-[10px] text-gray-400">综合评估分</span>
-                      </div>
+                      <svg className="w-24 h-24 transform -rotate-90"><circle className="text-gray-700" strokeWidth="6" stroke="currentColor" fill="transparent" r="44" cx="48" cy="48" /><circle className="text-jicai-blue" strokeWidth="6" strokeDasharray={276} strokeDashoffset={276 - (276 * (result?.score || 0)) / 100} strokeLinecap="round" stroke="currentColor" fill="transparent" r="44" cx="48" cy="48" /></svg>
+                      <div className="absolute inset-0 flex flex-col items-center justify-center"><span className="text-2xl font-bold text-white">{result?.score}</span><span className="text-[10px] text-gray-400">综合判定</span></div>
                     </div>
                     <div>
-                      <h3 className="text-2xl font-bold text-white mb-1">评估已完成</h3>
-                      <p className="text-gray-400 max-w-xs text-sm leading-relaxed">{result?.suggestion}</p>
+                      <h3 className="text-2xl font-bold text-white mb-2">多维体检报告已生成</h3>
+                      <p className="text-gray-400 text-sm max-w-sm">{result?.suggestion}</p>
                     </div>
                   </div>
                 </div>
 
+                {/* 🌟 新增：多维度诊断雷达与文字分析 */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                   <div className="bg-white/5 p-4 rounded-xl border border-white/10 hover:border-jicai-blue/50 transition-colors">
+                      <h4 className="text-jicai-blue text-sm font-bold mb-2">📚 学术竞争力</h4>
+                      <p className="text-gray-300 text-xs leading-relaxed">{result?.dimensions.academic}</p>
+                   </div>
+                   <div className="bg-white/5 p-4 rounded-xl border border-white/10 hover:border-jicai-blue/50 transition-colors">
+                      <h4 className="text-jicai-blue text-sm font-bold mb-2">🗣️ 语言达标率</h4>
+                      <p className="text-gray-300 text-xs leading-relaxed">{result?.dimensions.language}</p>
+                   </div>
+                   <div className="bg-white/5 p-4 rounded-xl border border-white/10 hover:border-jicai-blue/50 transition-colors">
+                      <h4 className="text-jicai-blue text-sm font-bold mb-2">🎯 择校策略</h4>
+                      <p className="text-gray-300 text-xs leading-relaxed">{result?.dimensions.strategy}</p>
+                   </div>
+                </div>
+
+                {/* 核心院校名单 */}
                 <div className="space-y-4 mb-8">
-                  <h4 className="text-lg font-bold text-white flex items-center gap-2">
-                    <BarChart3 size={20} className="text-jicai-blue" /> 巴伐利亚算法匹配结果
-                  </h4>
+                  <h4 className="text-lg font-bold text-white flex items-center gap-2"><BarChart3 size={20} className="text-jicai-blue" /> 巴伐利亚算法匹配结果</h4>
                   {result?.predictions.map((pred, i) => (
-                    <motion.div key={i} className="bg-white/5 border border-white/10 rounded-xl p-4 hover:bg-white/10 transition-colors">
+                    <div key={i} className="bg-white/5 border border-white/10 rounded-xl p-4">
                       <div className="flex justify-between items-center mb-2">
                         <div className="flex items-center gap-3">
                           <span className="font-bold text-white">{pred.name}</span>
@@ -240,33 +216,34 @@ export const AssessmentSection: React.FC = () => {
                         <span className="font-bold text-white">{pred.probability}%</span>
                       </div>
                       <div className="w-full bg-gray-700 rounded-full h-2 overflow-hidden mb-2">
-                        <motion.div animate={{ width: `${pred.probability}%` }} transition={{ duration: 1, ease: "easeOut" }} className={`h-full rounded-full ${pred.probability < 40 ? 'bg-red-500' : pred.probability < 70 ? 'bg-jicai-blue' : 'bg-green-500'}`}></motion.div>
+                        <motion.div animate={{ width: `${pred.probability}%` }} transition={{ duration: 1 }} className={`h-full rounded-full ${pred.probability < 40 ? 'bg-red-500' : pred.probability < 70 ? 'bg-jicai-blue' : 'bg-green-500'}`}></motion.div>
                       </div>
                       {pred.warningMsg && (
                          <div className="mt-2 text-xs text-red-400 flex items-start gap-1 bg-red-900/20 p-2 rounded border border-red-500/30">
-                            <AlertTriangle size={14} className="shrink-0 mt-0.5" />
-                            <span>{pred.warningMsg}</span>
+                            <AlertTriangle size={14} className="shrink-0 mt-0.5" /><span>{pred.warningMsg}</span>
                          </div>
                       )}
-                    </motion.div>
+                    </div>
                   ))}
                 </div>
 
-                <div className="bg-gradient-to-r from-jicai-blue/20 to-purple-500/20 rounded-xl p-6 border border-white/10 text-center relative overflow-hidden">
-                  <div className="absolute inset-0 backdrop-blur-sm bg-black/20 z-0"></div>
-                  <div className="relative z-10 flex flex-col items-center gap-4">
-                    <div className="p-3 bg-white/10 rounded-full"><Lock className="text-white" size={24} /></div>
-                    <div>
-                      <h4 className="text-white font-bold mb-1">解锁您的完整留德规划</h4>
-                      <p className="text-gray-300 text-sm">包含详细的背景提升建议、同等条件真实成功案例</p>
-                    </div>
-                    <button onClick={() => setShowFullReport(true)} className="bg-white text-jicai-black font-bold py-3 px-8 rounded-lg hover:bg-gray-200 transition-colors shadow-lg shadow-white/20">
-                      输入联系方式，免费获取报告
-                    </button>
-                  </div>
+                {/* 🌟 新增：交叉销售 / 细分咨询入口 */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+                  <button onClick={() => openLeadModal(`咨询 ${formData.major} 专业详情及课程匹配`)} className="bg-white/5 hover:bg-jicai-blue/20 border border-white/10 hover:border-jicai-blue p-3 rounded-lg text-xs text-gray-300 transition-all flex flex-col items-center gap-2">
+                    <BookOpen size={18} className="text-jicai-blue" /> 深度专业解析
+                  </button>
+                  <button onClick={() => openLeadModal("咨询德语/雅思备考及提分规划")} className="bg-white/5 hover:bg-jicai-blue/20 border border-white/10 hover:border-jicai-blue p-3 rounded-lg text-xs text-gray-300 transition-all flex flex-col items-center gap-2">
+                    <MessageCircle size={18} className="text-purple-400" /> 语言提分规划
+                  </button>
+                  <button onClick={() => openLeadModal("咨询留德APS审核/预科辅导")} className="bg-white/5 hover:bg-jicai-blue/20 border border-white/10 hover:border-jicai-blue p-3 rounded-lg text-xs text-gray-300 transition-all flex flex-col items-center gap-2">
+                    <FileText size={18} className="text-green-400" /> APS/预科辅导
+                  </button>
+                  <button onClick={() => openLeadModal("获取定制版选校方案及报价")} className="bg-jicai-blue/20 hover:bg-jicai-blue border border-jicai-blue p-3 rounded-lg text-xs text-white transition-all flex flex-col items-center gap-2 font-bold">
+                    <Lock size={18} /> 获取完整方案
+                  </button>
                 </div>
 
-                <div className="mt-8 text-center">
+                <div className="mt-6 text-center">
                   <button onClick={() => { setStep('form'); setContactSubmitted(false); }} className="text-gray-500 hover:text-white text-sm underline">返回重新评估</button>
                 </div>
               </motion.div>
@@ -275,7 +252,7 @@ export const AssessmentSection: React.FC = () => {
         </div>
       </div>
 
-      {/* 引流弹窗模块保持不变 */}
+      {/* 弹窗逻辑保持 */}
       <AnimatePresence>
         {showFullReport && (
           <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
@@ -285,41 +262,30 @@ export const AssessmentSection: React.FC = () => {
               
               {!contactSubmitted ? (
                 <div className="text-center">
-                  <h3 className="text-2xl font-bold text-jicai-black mb-2">获取详细评估报告</h3>
-                  <p className="text-gray-600 mb-6 text-sm">AI 已为您生成初步结果。请输入联系方式，解锁完整的录取概率分析与专家一对一规划。</p>
+                  <h3 className="text-2xl font-bold text-jicai-black mb-2">{inquiryContext.includes('完整') ? '获取详细评估报告' : '专属深度咨询'}</h3>
+                  <p className="text-gray-600 mb-6 text-sm">请输入联系方式，专家将针对【{inquiryContext}】为您提供一对一规划与资料包。</p>
                   
                   <div className="mb-6 text-left">
                     <label className="block text-sm font-medium text-gray-700 mb-2">手机号或微信号 <span className="text-red-500">*</span></label>
-                    <input
-                      type="text"
-                      placeholder="用于接收完整报告"
-                      value={formData.contact}
-                      onChange={(e) => handleInputChange('contact', e.target.value)}
-                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-800 focus:outline-none focus:border-jicai-blue transition-colors"
-                    />
+                    <input type="text" placeholder="用于接收资料与规划" value={formData.contact} onChange={(e) => handleInputChange('contact', e.target.value)} className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-800 focus:outline-none focus:border-jicai-blue transition-colors" />
                   </div>
                   
                   <button onClick={submitLead} disabled={isSubmitting} className="w-full bg-jicai-blue hover:bg-blue-600 text-white font-bold py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
-                    {isSubmitting ? '正在安全提交...' : '立即获取完整报告'}
+                    {isSubmitting ? '正在安全提交...' : '立即预约专家'}
                   </button>
                 </div>
               ) : (
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <CheckCircle className="text-green-500" size={32} />
-                  </div>
-                  <h3 className="text-2xl font-bold text-jicai-black mb-2">报告已生成！</h3>
-                  <p className="text-gray-600 mb-6 text-sm">您的专属顾问已收到评估数据，将尽快联系您发送完整方案。</p>
+                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4"><CheckCircle className="text-green-500" size={32} /></div>
+                  <h3 className="text-2xl font-bold text-jicai-black mb-2">预约已成功！</h3>
+                  <p className="text-gray-600 mb-6 text-sm">您的专属顾问已收到需求，将尽快联系您发送资料包。</p>
                   
                   <div className="bg-gray-50 p-4 rounded-xl inline-block mb-4 border border-gray-100">
                     <div className="w-40 h-40 bg-white flex items-center justify-center rounded-lg border border-gray-200 mx-auto">
-                       <img src="qrcode.png" alt="WeChat QR Code" className="w-full h-full object-contain" referrerPolicy="no-referrer" />
+                       <img src="qrcode.png" alt="WeChat" className="w-full h-full object-contain" referrerPolicy="no-referrer" />
                     </div>
                   </div>
-                  <div className="space-y-1 text-sm text-gray-500">
-                    <p>您也可以主动扫码添加顾问</p>
-                    <p className="font-bold text-jicai-blue">微信: jicaixiaokefu</p>
-                  </div>
+                  <div className="space-y-1 text-sm text-gray-500"><p>您也可以主动扫码添加顾问</p><p className="font-bold text-jicai-blue">微信: jicaixiaokefu</p></div>
                 </div>
               )}
             </motion.div>
