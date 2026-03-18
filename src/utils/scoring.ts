@@ -4,31 +4,30 @@ export interface AssessmentResult {
   score: number;
   radarScores: { academic: number; language: number; match: number };
   dimensions: { academic: string; language: string; strategy: string };
-  bavarianScoreDisplay: string; // 直观展示算出来的德国均分
-  predictions: { 
-    name: string; 
-    probability: number; 
-    type: 'reach' | 'match' | 'safety'; 
-    warningMsg?: string;
-    livingCost: number;
-    tuitionFee: string;
-  }[];
+  predictions: { name: string; probability: number; type: 'reach' | 'match' | 'safety'; warningMsg?: string; }[];
   suggestion: string;
+  // 新增字段
+  bavarianScoreDisplay: string;
+  apsPrediction: string;
 }
 
 export interface UserInput {
   degree: 'bachelor' | 'master';
-  // Bachelor Specific
-  highSchoolType?: string; 
-  gaokaoPercent?: string; // 高考生专属：过70%即可直录
-  // Master Specific
   gpa: number; 
-  background: string; 
-  ectsMatch?: string; // 新增：ECTS课程匹配度自测 (非常关键)
-  // Common
   language: string;
   major: string;
+  background: string; 
   hasTest: 'yes' | 'no'; 
+  
+  // 高中生详细字段
+  highSchoolType?: string; 
+  province?: string;
+  gaokaoScore?: number;
+  highSchoolScore?: string;
+  
+  // 硕士申请字段
+  hasFail?: 'yes' | 'no';
+  researchExp?: string[];
 }
 
 export const calculateScore = (input: UserInput): AssessmentResult => {
@@ -41,112 +40,129 @@ export const calculateScore = (input: UserInput): AssessmentResult => {
   let academicFeedback = "";
   let languageFeedback = "";
   let strategyFeedback = "";
+  let apsPrediction = "";
 
-  // 1. 学术及巴伐利亚分换算
   if (input.degree === 'master') {
-    // 巴伐利亚算法: 1 + 3 * (最高分 - 你的分) / (最高分 - 及格分)
     bavarianScore = 1 + 3 * (100 - input.gpa) / 40;
-    bavarianScore = Math.max(1.0, Math.min(4.0, Number(bavarianScore.toFixed(1)))); 
+    bavarianScore = Math.max(1.0, Math.min(4.0, bavarianScore)); 
     score = Math.round(100 - ((bavarianScore - 1) * 33));
     
     academicScore = score;
     if (input.background === '985' || input.background === '211') {
-      score += 8; academicScore += 15;
-      academicFeedback = `您的巴伐利亚换算分约为 ${bavarianScore}。985/211院校背景在申请TUM/RWTH等名校时拥有较高权重，审核部(APS)免责率较高。`;
+      score += 10; academicScore += 15;
+      academicFeedback = "您的985/211院校背景在申请中拥有极高权重，可适当豁免部分课程匹配度要求。";
     } else {
-      academicFeedback = `您的巴伐利亚换算分约为 ${bavarianScore}。双非背景申请名校需特别注意核心课程（Modulhandbuch）的精修描述，这是逆袭核心。`;
+      academicFeedback = "双非背景申请名校需特别注意课程描述（Modulhandbuch）的精修，这是逆袭核心。";
     }
 
-    // ECTS 匹配度影响
-    if (input.ectsMatch === 'low') {
-      score -= 15; matchScore = 40;
-      strategyFeedback = "⚠️ 警告：德国极度看重本科课程与硕士的ECTS学分匹配！您的前置学分缺口较大，面临高概率的『补课录取』或『直接拒录』，强烈建议预约专家进行学分审计。";
+    // 挂科惩罚
+    if (input.hasFail === 'yes') {
+      score -= 12;
+      academicFeedback += "挂科记录将在APS面试中被重点查问，务必准备合理的书面解释（如病假、转专业适应期等）。";
+      apsPrediction = "中/低 (有挂科记录，面试时准备书面说明，重点展示后续成绩回升和学习能力)";
     } else {
-      strategyFeedback = `根据您的综合画像，为您在全德50所目标院校库中进行了深度比对。推荐采用【冲刺+核心+保底】的梯度策略。`;
+      apsPrediction = bavarianScore <= 2.5 ? "高 (学术背景扎实，重点复习核心专业课，面试时展示系统的知识体系)" : "中 (建议提前3-6个月开始准备APS专业课复习，特别关注数学/物理基础)";
+    }
+
+    // 附加经历加分
+    const validExpCount = (input.researchExp || []).filter(v => v !== 'none').length;
+    if (validExpCount >= 2) {
+      score += 8;
+      academicFeedback += "丰富的科研/实习经历是你的核心竞争优势，在文书中务必重点呈现。";
+    } else if (validExpCount === 1) {
+      score += 4;
     }
 
   } else {
-    // 本科逻辑升级：高考过70%门槛
-    if (input.highSchoolType === 'gaokao' && input.gaokaoPercent === 'over70') {
-      bavarianScore = 1.8; score = 88; academicScore = 90;
-      academicFeedback = "您的高考分数满足总分70%的要求，具备直接入读德国本科的资格（无需读预科），极大地节省了时间和成本！";
-    } else if (input.highSchoolType === 'AL' || input.highSchoolType === 'IB') {
+    // 本科路线逻辑
+    if (input.highSchoolType === 'gaokao' && input.gaokaoScore) {
+      // 高考换算为百分制，再用修正公式换算德国GPA
+      const percent = (input.gaokaoScore / 750) * 100;
+      bavarianScore = 1 + 3 * (100 - percent) / (100 - 70);
+      bavarianScore = Math.max(1.0, Math.min(4.0, Number(bavarianScore.toFixed(1))));
+      
+      if (bavarianScore <= 1.5) {
+        score = 92; academicScore = 95;
+        academicFeedback = `高考成绩优异，德国GPA约 ${bavarianScore.toFixed(1)}，可直申TU9一线院校，无需预科。`;
+      } else if (bavarianScore <= 2.5) {
+        score = 80; academicScore = 82;
+        academicFeedback = `高考成绩良好，德国GPA约 ${bavarianScore.toFixed(1)}，可申请大多数院校，建议避开NC红海专业。`;
+      } else if (bavarianScore <= 3.0) {
+        score = 65; academicScore = 60;
+        academicFeedback = `高考成绩中等，德国GPA约 ${bavarianScore.toFixed(1)}，部分专业可能需要通过Studienkolleg预科过渡。`;
+      } else {
+        score = 45; academicScore = 40;
+        academicFeedback = `高考成绩偏低，德国GPA约 ${bavarianScore.toFixed(1)}，强烈建议先完成Studienkolleg预科并取得好成绩。`;
+      }
+      apsPrediction = "高 (高考程序相对简单，按要求准备材料和语言即可)";
+    } else if (input.highSchoolScore === 'excellent' || input.highSchoolType === 'IB' || input.highSchoolType === 'AL') {
       bavarianScore = 1.5; score = 90; academicScore = 95;
-      academicFeedback = "您的国际课程体系受 ZAB 认证，可利用 A-Level/IB 成绩直申德国本科。";
+      academicFeedback = "国际课程成绩优秀，可直入德国本科无需预科，竞争力极强。";
+      apsPrediction = "高 (国际课程免APS面试，通过材料审核即可)";
     } else {
-      bavarianScore = 2.8; score = 65; academicScore = 60;
-      academicFeedback = "根据当前学历条件，您可能需先申请德国大学预科（Studienkolleg）并通过 FSP 考试，建议立刻开始规划预科方向。";
+      bavarianScore = 2.5; score = 75; academicScore = 70;
+      academicFeedback = "成绩尚可，建议提前了解是否需要Studienkolleg预科，以及目标专业NC分数线。";
+      apsPrediction = "中 (需关注具体课程体系的审核要求)";
     }
-    strategyFeedback = "本科阶段申请重点在于APS审核与高考/国际成绩认证，语言达标是第一要务。";
   }
 
-  // 2. 语言评估
   if (['german_c1', 'ielts_7'].includes(input.language)) {
     score += 10; languageScore = 95;
-    languageFeedback = "语言能力已达到顶尖院校直录标准（DSH-2/DAF 4x4），具备强悍的申请竞争力。";
-  } else if (input.language === 'german_b2') {
-    languageScore = 75;
-    languageFeedback = "处于B2阶段，可申请部分带条件录取（Bedingte Zulassung）或冲刺语言班，需抓紧最后冲刺。";
+    languageFeedback = "语言能力已达到顶尖院校直录标准，具备强悍的申请竞争力。";
+  } else if (input.language === 'other') {
+    languageScore = 30;
+    languageFeedback = "严重短板！语言成绩缺失将导致初审直接被拒，急需开启密集强化训练。";
   } else {
-    languageScore = 40;
-    languageFeedback = "严重短板！德国多数公立大学要求C1级别直录，急需开启密集强化训练或考虑英语授课项目。";
+    languageScore = 70;
+    languageFeedback = "语言水平处于及格线边缘，冲击热门专业存在风险，建议继续冲刺高分或申请条件录取。";
   }
 
-  score = Math.min(99, Math.max(30, score));
+  score = Math.min(99, score);
 
-  // 3. 匹配大学并引入 NC (受限专业) 逻辑
   let relevantUnis = universitiesData.filter(uni => uni.majors.includes(input.major));
   if (relevantUnis.length === 0) relevantUnis = universitiesData.slice(0, 10); 
 
   const predictions = relevantUnis.map(uni => {
     let prob = 50; 
-    // 基础分转换：1.0满分，4.0及格
     prob += (2.5 - bavarianScore) * 25; 
 
-    // NC 受限专业惩罚：如果该专业是受限专业，且分数不够好（>1.8），概率大跌
-    const isNC = (uni.ncMajors as string[]).includes(input.major);
-    let warningMsg = "";
-
-    if (isNC) {
-      if (bavarianScore > 1.8) prob -= 30;
-      warningMsg = "⚠️ NC受限专业预警！名额极少，竞争白热化。";
-    }
-
-    // 语言惩罚
-    if (uni.minLang === 'german_c1' && !['german_c1', 'ielts_7'].includes(input.language)) prob -= 25;
+    if (uni.minLang === 'german_c1' && !['german_c1', 'ielts_7'].includes(input.language)) prob -= 30;
     if (input.language === 'other') prob -= 40;
 
-    // TUM / 商科 附加考试惩罚
+    let warningMsg = "";
     if (input.degree === 'master') {
       if (input.background === '985' || input.background === '211') prob += 15;
       if (uni.name.includes("慕尼黑工业大学") && input.major === "机械工程" && input.hasTest === 'no') {
-        prob -= 35; warningMsg = "注意：TUM该专业强烈建议带GRE申请，点击获取替代方案。";
+        prob -= 45; warningMsg = "注意：TUM该专业强烈建议GRE，点击获取免GRE备选方案！";
       }
-      if ((input.major === "商科" || input.major === "经济学") && uni.tier === 'S' && input.hasTest === 'no') {
-        prob -= 30; warningMsg = "名校商科强烈依赖GMAT成绩，建议联系我们获取规划。";
+      if (uni.name.includes("曼海姆") && (input.major === "商科" || input.major === "经济学") && input.hasTest === 'no') {
+        prob -= 45; warningMsg = "警告：商科强烈依赖GMAT成绩，建议联系我们获取规划。";
       }
+    }
+
+    // NC逻辑预警 (为后续 universities.json 扩充做准备)
+    const uniAny = uni as any;
+    if (uniAny.restricted && uniAny.restricted.includes(input.major)) {
+       prob -= 15; // NC专业基础扣分
+       if (bavarianScore > 2.0) prob -= 20; // 分数不够再扣
     }
 
     prob = Math.max(5, Math.min(98, prob)); 
     let type: 'reach' | 'match' | 'safety' = prob < 40 ? 'reach' : prob < 75 ? 'match' : 'safety'; 
-    return { 
-      name: uni.name, 
-      probability: Math.round(prob), 
-      type, 
-      warningMsg,
-      livingCost: uni.livingCost as number,
-      tuitionFee: uni.tuitionFee as string
-    };
+    return { name: uni.name, probability: Math.round(prob), type, warningMsg, isNc: uniAny.restricted && uniAny.restricted.includes(input.major) };
   });
 
   const sortedPredictions = predictions.sort((a, b) => b.probability - a.probability);
+  
+  strategyFeedback = `根据您的综合画像，为您在全德50所目标院校库中进行了深度比对。推荐采用【冲刺+核心+保底】的梯度策略，重点避开强制要求${input.degree === 'master' ? '标化考试' : '高难预科'}的红海项目。`;
 
   return {
     score,
     radarScores: { academic: Math.min(99, academicScore), language: languageScore, match: matchScore },
     dimensions: { academic: academicFeedback, language: languageFeedback, strategy: strategyFeedback },
-    bavarianScoreDisplay: bavarianScore.toString(),
-    predictions: sortedPredictions.slice(0, 5), // 输出前5所展示
-    suggestion: "多维体检报告已生成，已解锁您的巴伐利亚均分、受限专业避坑指南及生活成本预估。"
+    predictions: sortedPredictions.slice(0, 5),
+    suggestion: "多维体检报告已生成，请查阅下方各项指标分析及专属行动建议。",
+    bavarianScoreDisplay: `约 ${bavarianScore.toFixed(1)} / 4.0`,
+    apsPrediction: apsPrediction
   };
 };
