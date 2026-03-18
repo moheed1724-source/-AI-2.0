@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { calculateScore, UserInput, AssessmentResult } from '../utils/scoring';
-import { Lock, X, BarChart3, CheckCircle, AlertTriangle, BookOpen, MessageCircle, FileText, ChevronRight, Euro, GraduationCap } from 'lucide-react';
+import { Lock, X, BarChart3, CheckCircle, AlertTriangle, BookOpen, MessageCircle, FileText } from 'lucide-react';
 
 export const AssessmentSection: React.FC = () => {
   const [step, setStep] = useState<'form' | 'result'>('form');
-  const [formWizardStep, setFormWizardStep] = useState(1); // 1: 背景, 2: 成绩/专业, 3: 语言/考试
   const [loading, setLoading] = useState(false);
   const [loadingStep, setLoadingStep] = useState(0);
   const [showFullReport, setShowFullReport] = useState(false);
@@ -14,28 +13,22 @@ export const AssessmentSection: React.FC = () => {
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [contactSubmitted, setContactSubmitted] = useState(false);
-  const [userCount, setUserCount] = useState(12845); // 模拟营销数字
 
-  useEffect(() => {
-    // 模拟正在测试的人数增长
-    const interval = setInterval(() => setUserCount(prev => prev + Math.floor(Math.random() * 3)), 8000);
-    return () => clearInterval(interval);
-  }, []);
-
+  // 初始化所有所需字段
   const [formData, setFormData] = useState<UserInput & { contact: string }>({
-    degree: 'master', gpa: 80, language: 'german_b2', major: '机械工程', background: '211', hasTest: 'no', highSchoolType: 'gaokao', gaokaoPercent: 'under70', ectsMatch: 'medium', contact: ''
+    degree: 'master', gpa: 85, language: 'german_b2', major: '机械工程', 
+    background: '211', hasTest: 'no', highSchoolType: 'gaokao', 
+    highSchoolScore: 'good', contact: '',
+    hasFail: 'no', researchExp: [], province: 'other', gaokaoScore: undefined
   });
 
   const handleInputChange = (field: string, value: any) => setFormData(prev => ({ ...prev, [field]: value }));
 
-  const nextStep = () => setFormWizardStep(prev => Math.min(prev + 1, 3));
-  const prevStep = () => setFormWizardStep(prev => Math.max(prev - 1, 1));
-
   const loadingTexts = [
-    "正在分析您的学历背景与巴伐利亚折算分...",
-    "正在比对德国各州高校的 ECTS 与 NC 录取门槛...",
-    "正在匹配留德生活费与巴符州等学费政策...",
-    "生成《济才留德深度诊断白皮书》..."
+    "正在建立您的专属学术背景画像...",
+    "正在通过巴伐利亚算法转换您的绩点...",
+    "正在全德 50 所主流院校库中进行比对...",
+    "正在生成济才多维录取诊断书..."
   ];
 
   const handleGenerate = () => {
@@ -44,15 +37,14 @@ export const AssessmentSection: React.FC = () => {
     const interval = setInterval(() => {
       currentStep += 1;
       if (currentStep < 4) setLoadingStep(currentStep);
-    }, 1200);
+    }, 1500);
 
     setTimeout(() => {
       clearInterval(interval);
       setResult(calculateScore(formData as UserInput));
       setLoading(false); setStep('result');
-      // 延迟弹出诱导留资弹窗
-      setTimeout(() => openLeadModal("获取剩余45所高校匹配清单及破局方案"), 4000);
-    }, 5500); 
+      setTimeout(() => openLeadModal("获取完整评估与冲刺名单"), 3000);
+    }, 6500); 
   };
 
   const openLeadModal = (context: string) => {
@@ -73,7 +65,6 @@ export const AssessmentSection: React.FC = () => {
           '联系方式': formData.contact,
           '申请阶段': formData.degree,
           '目标专业': formData.major,
-          ...(formData.degree === 'master' ? { 'GPA': formData.gpa, '背景': formData.background } : { '体系': formData.highSchoolType, '过线情况': formData.gaokaoPercent })
         })
       });
       if (response.ok) setContactSubmitted(true);
@@ -81,180 +72,223 @@ export const AssessmentSection: React.FC = () => {
     setIsSubmitting(false);
   };
 
-  // 渲染表单分布向导
-  const renderFormStep = () => {
-    switch(formWizardStep) {
-      case 1:
-        return (
-          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
-            <h3 className="text-xl font-bold text-white mb-4">第一步：确认您的升学阶段</h3>
-            <div>
-              <label className="block text-sm font-medium text-gray-400 mb-2">申请阶段</label>
-              <div className="flex gap-4">
-                {['bachelor', 'master'].map((type) => (
-                  <button key={type} onClick={() => handleInputChange('degree', type)} className={`flex-1 py-4 px-4 rounded-xl border transition-all ${formData.degree === type ? 'bg-jicai-blue/20 border-jicai-blue text-jicai-blue shadow-[0_0_15px_rgba(0,112,243,0.3)]' : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'}`}>
-                    <GraduationCap className="mx-auto mb-2" size={24} />
-                    {type === 'bachelor' ? '德国本科 (Bachelor)' : '德国硕士 (Master)'}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {formData.degree === 'master' ? (
-              <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2">您的国内院校背景</label>
-                <select value={formData.background} onChange={(e) => handleInputChange('background', e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-jicai-blue transition-colors">
-                  <option value="985">985 院校 (强竞争力)</option><option value="211">211 院校</option><option value="tier1">双非一本</option><option value="tier2">二本/独立学院</option>
-                </select>
-              </div>
-            ) : (
-              <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2">您目前的高中课程体系</label>
-                <select value={formData.highSchoolType} onChange={(e) => handleInputChange('highSchoolType', e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-jicai-blue transition-colors">
-                  <option value="gaokao">普通高中 (走高考程序)</option><option value="AL">A-Level 课程</option><option value="IB">IB 课程</option><option value="OSSD">OSSD / 其他国际体系</option>
-                </select>
-              </div>
-            )}
-          </motion.div>
-        );
-      case 2:
-        return (
-          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
-            <h3 className="text-xl font-bold text-white mb-4">第二步：评估专业与成绩门槛</h3>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-400 mb-2">目标申请专业方向 (大类)</label>
-              <select value={formData.major} onChange={(e) => handleInputChange('major', e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-jicai-blue transition-colors">
-                <option value="机械工程">机械工程 / 车辆工程 (热门)</option><option value="计算机">计算机科学 / AI (NC高危)</option><option value="电气工程">电气工程 (EE)</option><option value="商科">商科 / 管理学 (BWL/VWL)</option><option value="经济学">经济学</option>
-              </select>
-            </div>
-
-            {formData.degree === 'master' ? (
-              <>
-                <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">目前算术均分 (GPA/100)</label>
-                  <input type="range" min="60" max="100" value={formData.gpa} onChange={(e) => handleInputChange('gpa', parseInt(e.target.value))} className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-jicai-blue" />
-                  <div className="flex justify-between mt-2 text-sm text-gray-500"><span>60</span><span className="text-jicai-blue font-bold text-lg">{formData.gpa}</span><span>100</span></div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">您的本科课程与德国目标专业匹配度 (ECTS) 预估</label>
-                  <select value={formData.ectsMatch} onChange={(e) => handleInputChange('ectsMatch', e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-jicai-blue transition-colors">
-                    <option value="high">极高 (纯本专业直升，课程几乎一致)</option><option value="medium">中等 (同大类，但细分方向有略微差异)</option><option value="low">较低 (跨专业或国内本科严重缺课)</option>
-                  </select>
-                  <p className="text-[10px] text-gray-500 mt-1">注：德国硕士极度看重学分匹配(Modulhandbuch)，跨专业极难。</p>
-                </div>
-              </>
-            ) : (
-              formData.highSchoolType === 'gaokao' && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">预估高考分数情况 (德国规定：超满分70%可直录)</label>
-                  <select value={formData.gaokaoPercent} onChange={(e) => handleInputChange('gaokaoPercent', e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-jicai-blue transition-colors">
-                    <option value="over70">稳超 70% (如 750满分考 525以上)</option><option value="under70">不足 70% (可能需读德国预科)</option>
-                  </select>
-                </div>
-              )
-            )}
-          </motion.div>
-        );
-      case 3:
-        return (
-          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
-            <h3 className="text-xl font-bold text-white mb-4">第三步：语言与附加条件</h3>
-            <div>
-              <label className="block text-sm font-medium text-gray-400 mb-2">目前德语/英语语言水平</label>
-              <select value={formData.language} onChange={(e) => handleInputChange('language', e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-jicai-blue transition-colors">
-                <option value="german_c1">德语 C1 / TestDaF 4x4 / DSH-2 (名校直录标准)</option><option value="german_b2">德语 B2</option><option value="german_b1">德语 B1</option><option value="ielts_7">雅思 7.0+ (走英授项目)</option><option value="other">零基础 / 正在学</option>
-              </select>
-            </div>
-            {formData.degree === 'master' && (
-              <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2">是否准备考取 GRE / GMAT？</label>
-                <div className="flex gap-4">
-                  {['yes', 'no'].map((val) => (
-                    <button key={val} onClick={() => handleInputChange('hasTest', val)} className={`flex-1 py-3 px-4 rounded-xl border transition-all ${formData.hasTest === val ? 'bg-jicai-blue/20 border-jicai-blue text-jicai-blue' : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'}`}>
-                      {val === 'yes' ? '准备/已有成绩' : '不考虑 (避开TUM等)'}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-            
-            <div className="mt-8">
-               <button onClick={handleGenerate} disabled={loading} className="w-full bg-jicai-blue hover:bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 relative overflow-hidden h-16">
-                 {loading ? (
-                    <AnimatePresence mode="wait"><motion.span key={loadingStep} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -15 }} transition={{ duration: 0.3 }} className="text-white/90 text-sm md:text-base font-medium">{loadingTexts[loadingStep]}</motion.span></AnimatePresence>
-                 ) : '生成专属录取分析报告'}
-               </button>
-            </div>
-          </motion.div>
-        );
-    }
-  };
-
   return (
     <section id="assessment" className="py-20 bg-jicai-dark relative overflow-hidden">
-      {/* 背景特效 */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden opacity-10 pointer-events-none">
         <div className="absolute top-10 left-10 w-64 h-64 bg-jicai-blue rounded-full blur-3xl"></div>
         <div className="absolute bottom-10 right-10 w-96 h-96 bg-purple-600 rounded-full blur-3xl"></div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="text-center mb-10">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">AI 智能录取评估系统 2.0</h2>
-          <p className="text-gray-400 max-w-2xl mx-auto text-sm">内置巴伐利亚换算算法、ECTS学分匹配模型及最新全德高校受限专业(NC)数据库。</p>
-          <div className="mt-4 inline-block bg-white/5 border border-white/10 rounded-full px-4 py-1.5 text-xs text-gray-300">
-            🟢 已有 <span className="text-jicai-blue font-bold">{userCount}</span> 位同学完成了背景测评
-          </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">AI 智能评估系统</h2>
+          <p className="text-gray-400 max-w-2xl mx-auto">引入巴伐利亚转换算法与50所院校库，多维预测录取概率</p>
         </div>
 
-        <div className="bg-jicai-black/50 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-2xl min-h-[450px]">
+        <div className="max-w-4xl mx-auto bg-jicai-black/50 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
           <AnimatePresence mode="wait">
             {step === 'form' ? (
-              <motion.div key="form" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="p-8 md:p-12">
-                 
-                 {/* 进度条 */}
-                 <div className="flex justify-between mb-8 relative">
-                   <div className="absolute top-1/2 left-0 w-full h-0.5 bg-gray-800 -z-10 -translate-y-1/2"></div>
-                   <div className="absolute top-1/2 left-0 h-0.5 bg-jicai-blue -z-10 -translate-y-1/2 transition-all duration-500" style={{ width: `${(formWizardStep - 1) * 50}%` }}></div>
-                   {[1, 2, 3].map(s => (
-                     <div key={s} className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold border-2 transition-colors ${formWizardStep >= s ? 'bg-jicai-blue border-jicai-blue text-white' : 'bg-gray-900 border-gray-700 text-gray-500'}`}>{s}</div>
-                   ))}
-                 </div>
+              <motion.div key="form" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="p-8 md:p-12">
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  {/* ====== 左侧表单 ====== */}
+                  <div className="space-y-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-400 mb-2">申请阶段</label>
+                      <div className="flex gap-4">
+                        {['bachelor', 'master'].map((type) => (
+                          <button key={type} onClick={() => handleInputChange('degree', type)} className={`flex-1 py-3 px-4 rounded-xl border transition-all ${formData.degree === type ? 'bg-jicai-blue/20 border-jicai-blue text-jicai-blue' : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'}`}>
+                            {type === 'bachelor' ? '本科 (Bachelor)' : '硕士 (Master)'}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
 
-                 {/* 表单区域 */}
-                 <div className="min-h-[260px]">
-                   <AnimatePresence mode="wait">
-                     {renderFormStep()}
-                   </AnimatePresence>
-                 </div>
+                    {formData.degree === 'master' ? (
+                      <>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-400 mb-2">国内均分 (GPA/100)</label>
+                          <input type="range" min="60" max="100" value={formData.gpa} onChange={(e) => handleInputChange('gpa', parseInt(e.target.value))} className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-jicai-blue" />
+                          <div className="flex justify-between mt-2 text-sm text-gray-500"><span>60</span><span className="text-jicai-blue font-bold text-lg">{formData.gpa}</span><span>100</span></div>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-400 mb-2">国内院校层级</label>
+                          <select value={formData.background} onChange={(e) => handleInputChange('background', e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-jicai-blue transition-colors">
+                            <option value="985">985 院校</option><option value="211">211 院校</option><option value="tier1">普通一本</option><option value="tier2">二本及其他</option>
+                          </select>
+                        </div>
+                        {/* 新增: 挂科记录 */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-400 mb-2">
+                            是否有挂科记录？<span className="text-xs text-red-400 ml-1">(影响APS评估)</span>
+                          </label>
+                          <div className="flex gap-4">
+                            {[{val: 'no', label: '无挂科'}, {val: 'yes', label: '有挂科 (可能影响APS)'}].map((opt) => (
+                              <button key={opt.val} onClick={() => handleInputChange('hasFail', opt.val)} className={`flex-1 py-3 px-4 rounded-xl border transition-all text-sm ${formData.hasFail === opt.val ? 'bg-jicai-blue/20 border-jicai-blue text-jicai-blue' : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'}`}>
+                                {opt.label}
+                              </button>
+                            ))}
+                          </div>
+                          {formData.hasFail === 'yes' && (
+                            <p className="text-xs text-red-400 mt-2">提示：挂科记录需在APS面谈中给出合理解释。</p>
+                          )}
+                        </div>
+                        {/* 新增: 附加经历 */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-400 mb-2">
+                            附加经历补充 <span className="text-xs text-gray-500 ml-1">(多选加分项)</span>
+                          </label>
+                          <div className="grid grid-cols-2 gap-2">
+                            {[
+                              {val: 'research', label: '科研/实验室'}, {val: 'paper', label: '发表论文'},
+                              {val: 'intern', label: '相关实习'}, {val: 'competition', label: '学科竞赛'},
+                              {val: 'exchange', label: '交换/访学'}, {val: 'none', label: '暂无以上经历'}
+                            ].map((exp) => {
+                              const selected = formData.researchExp?.includes(exp.val);
+                              return (
+                                <button key={exp.val} onClick={() => {
+                                  const current = formData.researchExp || [];
+                                  const updated = selected ? current.filter(v => v !== exp.val) : [...current, exp.val];
+                                  handleInputChange('researchExp', updated);
+                                }} className={`py-2.5 px-3 rounded-xl border transition-all text-sm text-left ${selected ? 'bg-jicai-blue/20 border-jicai-blue text-jicai-blue' : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'}`}>
+                                  {exp.label}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        {/* 本科：课程体系 */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-400 mb-2">
+                            课程体系 <span className="text-red-400">*</span>
+                          </label>
+                          <select value={formData.highSchoolType} onChange={(e) => handleInputChange('highSchoolType', e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-jicai-blue transition-colors">
+                            <option value="gaokao">普通高中 (走高考程序)</option>
+                            <option value="AL">A-Level 课程</option>
+                            <option value="IB">IB 课程</option>
+                            <option value="AP">AP 课程</option>
+                            <option value="OSSD">OSSD / 其他国际体系</option>
+                            <option value="studienkolleg">德国预科在读 (Studienkolleg)</option>
+                          </select>
+                        </div>
 
-                 {/* 底部导航 */}
-                 {formWizardStep < 3 && !loading && (
-                   <div className="flex justify-between mt-8 pt-6 border-t border-white/10">
-                     <button onClick={prevStep} className={`px-6 py-2 rounded-lg text-sm transition-colors ${formWizardStep === 1 ? 'opacity-0 pointer-events-none' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>上一步</button>
-                     <button onClick={nextStep} className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-sm flex items-center gap-2 transition-colors">下一步 <ChevronRight size={16} /></button>
-                   </div>
-                 )}
+                        {/* 本科：高考路线分数输入 */}
+                        {formData.highSchoolType === 'gaokao' && (
+                          <>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-400 mb-2">高考所在省份</label>
+                              <select value={formData.province} onChange={(e) => handleInputChange('province', e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-jicai-blue transition-colors">
+                                <option value="other">全国卷及其他省份 (满分750)</option>
+                                <option value="shanghai">上海卷 (满分660)</option>
+                                <option value="hainan">海南卷 (满分900)</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-400 mb-2">
+                                预估/真实高考总分
+                              </label>
+                              <input type="number" min="200" max="900" value={formData.gaokaoScore || ''} onChange={(e) => handleInputChange('gaokaoScore', parseInt(e.target.value) || undefined)} placeholder="输入分数, 如 588" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-jicai-blue transition-colors" />
+                              
+                              {/* 实时分数换算提示 */}
+                              {formData.gaokaoScore && formData.gaokaoScore > 200 && (
+                                <p className="text-xs text-jicai-blue mt-2">
+                                  该分数达到满分的 {((formData.gaokaoScore / (formData.province === 'shanghai' ? 660 : formData.province === 'hainan' ? 900 : 750)) * 100).toFixed(1)}% (德国直录标准: 70%)
+                                </p>
+                              )}
+                            </div>
+                          </>
+                        )}
+
+                        {/* 本科：国际课程路线预估等级 */}
+                        {formData.highSchoolType !== 'gaokao' && (
+                          <div>
+                            <label className="block text-sm font-medium text-gray-400 mb-2">目前成绩预估水平</label>
+                            <select value={formData.highSchoolScore} onChange={(e) => handleInputChange('highSchoolScore', e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-jicai-blue transition-colors">
+                              {formData.highSchoolType === 'IB' && (
+                                <>
+                                  <option value="excellent">拔尖 (38分及以上)</option>
+                                  <option value="good">良好 (33-37分)</option>
+                                  <option value="average">中等 (28-32分)</option>
+                                  <option value="low">偏低 (需要预科)</option>
+                                </>
+                              )}
+                              {formData.highSchoolType === 'AL' && (
+                                <>
+                                  <option value="excellent">拔尖 (A*A*A及以上)</option>
+                                  <option value="good">良好 (AAB-ABB)</option>
+                                  <option value="average">中等 (BBB-BCC)</option>
+                                  <option value="low">偏低 (需要预科)</option>
+                                </>
+                              )}
+                              {['AP', 'OSSD', 'studienkolleg'].includes(formData.highSchoolType || '') && (
+                                <>
+                                  <option value="excellent">成绩优异</option>
+                                  <option value="good">成绩良好</option>
+                                  <option value="average">成绩中等</option>
+                                  <option value="low">成绩偏弱</option>
+                                </>
+                              )}
+                            </select>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+
+                  {/* ====== 右侧表单 ====== */}
+                  <div className="space-y-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-400 mb-2">目标专业方向</label>
+                      <select value={formData.major} onChange={(e) => handleInputChange('major', e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-jicai-blue transition-colors">
+                        <option value="机械工程">机械工程</option><option value="计算机">计算机科学</option><option value="电气工程">电气工程</option><option value="商科">商科/管理</option><option value="经济学">经济学</option>
+                      </select>
+                    </div>
+                    {/* 德语状态 */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-400 mb-2">
+                        目前语言水平 <span className="text-xs text-gray-500 ml-1">(部分院校要求网申带语言)</span>
+                      </label>
+                      <select value={formData.language} onChange={(e) => handleInputChange('language', e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-jicai-blue transition-colors">
+                        <option value="german_c1">德语 TestDaF 4x4 / C1</option><option value="german_b2">德语 B2</option><option value="german_b1">德语 B1</option><option value="ielts_7">雅思 7.0+</option><option value="ielts_6.5">雅思 6.5</option><option value="other">其他 / 暂无 / 正在学</option>
+                      </select>
+                    </div>
+                    {formData.degree === 'master' && (
+                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                        <label className="block text-sm font-medium text-gray-400 mb-2">是否拥有 GRE / GMAT 成绩？</label>
+                        <div className="flex gap-4">
+                          {['yes', 'no'].map((val) => (
+                            <button key={val} onClick={() => handleInputChange('hasTest', val)} className={`flex-1 py-3 px-4 rounded-xl border transition-all ${formData.hasTest === val ? 'bg-jicai-blue/20 border-jicai-blue text-jicai-blue' : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'}`}>
+                              {val === 'yes' ? '是 (有成绩)' : '否 (暂无)'}
+                            </button>
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+                  </div>
+                </div>
+                <div className="mt-10">
+                  <button onClick={handleGenerate} disabled={loading} className="w-full bg-jicai-blue hover:bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 relative overflow-hidden h-16">
+                    {loading ? (
+                       <AnimatePresence mode="wait"><motion.span key={loadingStep} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -15 }} transition={{ duration: 0.3 }} className="text-white/90 text-sm md:text-base font-medium">{loadingTexts[loadingStep]}</motion.span></AnimatePresence>
+                    ) : '开始精准计算概率'}
+                  </button>
+                </div>
               </motion.div>
             ) : (
               <motion.div key="result" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="p-8 md:p-12">
                 
-                {/* 报告头部 - 强化巴伐利亚分显示 */}
+                {/* 报告头部 */}
                 <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-6 border-b border-white/10 pb-8">
                   <div className="flex items-center gap-6">
                     <div className="relative">
                       <svg className="w-24 h-24 transform -rotate-90"><circle className="text-gray-700" strokeWidth="6" stroke="currentColor" fill="transparent" r="44" cx="48" cy="48" /><circle className="text-jicai-blue" strokeWidth="6" strokeDasharray={276} strokeDashoffset={276 - (276 * (result?.score || 0)) / 100} strokeLinecap="round" stroke="currentColor" fill="transparent" r="44" cx="48" cy="48" /></svg>
-                      <div className="absolute inset-0 flex flex-col items-center justify-center"><span className="text-2xl font-bold text-white">{result?.score}</span><span className="text-[10px] text-gray-400">系统综合评分</span></div>
+                      <div className="absolute inset-0 flex flex-col items-center justify-center"><span className="text-2xl font-bold text-white">{result?.score}</span><span className="text-[10px] text-gray-400">综合判定</span></div>
                     </div>
                     <div>
-                      <h3 className="text-2xl font-bold text-white mb-2">诊断报告生成完毕</h3>
+                      <h3 className="text-2xl font-bold text-white mb-2">多维体检报告已生成</h3>
                       <p className="text-gray-400 text-sm max-w-sm">{result?.suggestion}</p>
-                      {formData.degree === 'master' && (
-                        <div className="mt-2 inline-flex items-center gap-2 bg-jicai-blue/10 border border-jicai-blue/30 px-3 py-1 rounded text-xs text-jicai-blue">
-                          <span>您的德国巴伐利亚预估均分：</span><span className="font-bold text-lg">{result?.bavarianScoreDisplay}</span>
-                        </div>
-                      )}
                     </div>
                   </div>
                 </div>
@@ -262,23 +296,42 @@ export const AssessmentSection: React.FC = () => {
                 {/* 多维度诊断雷达与文字分析 */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
                    <div className="bg-white/5 p-4 rounded-xl border border-white/10 hover:border-jicai-blue/50 transition-colors">
-                      <h4 className="text-jicai-blue text-sm font-bold mb-2">📚 学术与学分匹配</h4>
+                      <h4 className="text-jicai-blue text-sm font-bold mb-2">📚 学术竞争力</h4>
                       <p className="text-gray-300 text-xs leading-relaxed">{result?.dimensions.academic}</p>
                    </div>
                    <div className="bg-white/5 p-4 rounded-xl border border-white/10 hover:border-jicai-blue/50 transition-colors">
-                      <h4 className="text-jicai-blue text-sm font-bold mb-2">🗣️ 语言及附加条件</h4>
+                      <h4 className="text-jicai-blue text-sm font-bold mb-2">🗣️ 语言达标率</h4>
                       <p className="text-gray-300 text-xs leading-relaxed">{result?.dimensions.language}</p>
                    </div>
                    <div className="bg-white/5 p-4 rounded-xl border border-white/10 hover:border-jicai-blue/50 transition-colors">
-                      <h4 className="text-jicai-blue text-sm font-bold mb-2">🎯 风险评估预警</h4>
+                      <h4 className="text-jicai-blue text-sm font-bold mb-2">🎯 择校策略</h4>
                       <p className="text-gray-300 text-xs leading-relaxed">{result?.dimensions.strategy}</p>
                    </div>
                 </div>
 
-                {/* 核心院校名单 - 新增生活费与学费数据 */}
+                {/* 新增：GPA 和 APS 预测展示区 */}
+                {result?.bavarianScoreDisplay && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                    {/* 德国GPA换算 */}
+                    <div className="bg-white/5 border border-jicai-blue/30 rounded-xl p-4">
+                      <h4 className="text-jicai-blue text-sm font-bold mb-2">🎓 预估德国 GPA 成绩</h4>
+                      <div className="text-3xl font-bold text-white mb-1">{result.bavarianScoreDisplay}</div>
+                      <p className="text-xs text-gray-400">基于巴伐利亚公式推算 (1.0为满分，4.0及格)</p>
+                    </div>
+
+                    {/* APS通过率预测 */}
+                    <div className="bg-white/5 border border-purple-500/30 rounded-xl p-4">
+                      <h4 className="text-purple-400 text-sm font-bold mb-2">🛡️ 留德 APS 审核预测</h4>
+                      <div className="text-xl font-bold text-white mb-1">{result.apsPrediction.split(' ')[0]}</div>
+                      <p className="text-xs text-gray-400 leading-relaxed">{result.apsPrediction.substring(result.apsPrediction.indexOf('('))}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* 核心院校名单 */}
                 <div className="space-y-4 mb-8">
-                  <h4 className="text-lg font-bold text-white flex items-center gap-2"><BarChart3 size={20} className="text-jicai-blue" /> 精选匹配院校动态监测</h4>
-                  {result?.predictions.map((pred, i) => (
+                  <h4 className="text-lg font-bold text-white flex items-center gap-2"><BarChart3 size={20} className="text-jicai-blue" /> 巴伐利亚算法匹配结果</h4>
+                  {result?.predictions.map((pred: any, i) => (
                     <div key={i} className="bg-white/5 border border-white/10 rounded-xl p-4">
                       <div className="flex justify-between items-center mb-2">
                         <div className="flex items-center gap-3">
@@ -289,36 +342,41 @@ export const AssessmentSection: React.FC = () => {
                         </div>
                         <span className="font-bold text-white">{pred.probability}%</span>
                       </div>
-                      
-                      {/* 数据条 */}
-                      <div className="w-full bg-gray-700 rounded-full h-1.5 mb-3 overflow-hidden">
+                      <div className="w-full bg-gray-700 rounded-full h-2 overflow-hidden mb-2">
                         <motion.div animate={{ width: `${pred.probability}%` }} transition={{ duration: 1 }} className={`h-full rounded-full ${pred.probability < 40 ? 'bg-red-500' : pred.probability < 70 ? 'bg-jicai-blue' : 'bg-green-500'}`}></motion.div>
                       </div>
-
-                      {/* 留德干货数据：生活费与学费 */}
-                      <div className="flex flex-wrap gap-4 mt-2 border-t border-white/5 pt-2">
-                         <div className="flex items-center gap-1 text-xs text-gray-400"><Euro size={12} className="text-gray-500"/> 预估生活费: {pred.livingCost}欧/月</div>
-                         <div className={`flex items-center gap-1 text-xs ${pred.tuitionFee.includes('免学费') ? 'text-green-400/80' : 'text-orange-400/80'}`}><GraduationCap size={12}/> 政策: {pred.tuitionFee}</div>
-                      </div>
-
-                      {/* NC及特殊要求警告 */}
                       {pred.warningMsg && (
                          <div className="mt-2 text-xs text-red-400 flex items-start gap-1 bg-red-900/20 p-2 rounded border border-red-500/30">
                             <AlertTriangle size={14} className="shrink-0 mt-0.5" /><span>{pred.warningMsg}</span>
                          </div>
                       )}
+                      {/* 新增：受限专业预警 */}
+                      {pred.isNc && (
+                         <div className="mt-2 text-xs text-yellow-400 flex items-start gap-1 bg-yellow-900/20 p-2 rounded border border-yellow-500/30">
+                            <AlertTriangle size={14} className="shrink-0 mt-0.5" /><span>Numerus Clausus (NC) 受限专业预警：该专业招生名额存在严格限制，竞争激烈。</span>
+                         </div>
+                      )}
                     </div>
                   ))}
-                  
-                  {/* 营销钩子：隐藏更多学校诱导加微信 */}
-                  <div onClick={() => openLeadModal("获取完整版定校清单及详细专业评估")} className="w-full bg-jicai-blue/10 border border-jicai-blue/30 border-dashed rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer hover:bg-jicai-blue/20 transition-all group">
-                     <Lock size={20} className="text-jicai-blue mb-2 group-hover:scale-110 transition-transform" />
-                     <p className="text-sm text-jicai-blue font-bold">点击解锁剩余 45 所高校申请概率及专属提升方案</p>
-                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+                  <button onClick={() => openLeadModal(`咨询 ${formData.major} 专业详情及课程匹配`)} className="bg-white/5 hover:bg-jicai-blue/20 border border-white/10 hover:border-jicai-blue p-3 rounded-lg text-xs text-gray-300 transition-all flex flex-col items-center gap-2">
+                    <BookOpen size={18} className="text-jicai-blue" /> 深度专业解析
+                  </button>
+                  <button onClick={() => openLeadModal("咨询德语/雅思备考及提分规划")} className="bg-white/5 hover:bg-jicai-blue/20 border border-white/10 hover:border-jicai-blue p-3 rounded-lg text-xs text-gray-300 transition-all flex flex-col items-center gap-2">
+                    <MessageCircle size={18} className="text-purple-400" /> 语言提分规划
+                  </button>
+                  <button onClick={() => openLeadModal("咨询留德APS审核/预科辅导")} className="bg-white/5 hover:bg-jicai-blue/20 border border-white/10 hover:border-jicai-blue p-3 rounded-lg text-xs text-gray-300 transition-all flex flex-col items-center gap-2">
+                    <FileText size={18} className="text-green-400" /> APS/预科辅导
+                  </button>
+                  <button onClick={() => openLeadModal("获取定制版选校方案及报价")} className="bg-jicai-blue/20 hover:bg-jicai-blue border border-jicai-blue p-3 rounded-lg text-xs text-white transition-all flex flex-col items-center gap-2 font-bold">
+                    <Lock size={18} /> 获取完整方案
+                  </button>
                 </div>
 
                 <div className="mt-6 text-center">
-                  <button onClick={() => { setStep('form'); setFormWizardStep(1); setContactSubmitted(false); }} className="text-gray-500 hover:text-white text-sm underline">重新进行背景评估</button>
+                  <button onClick={() => { setStep('form'); setContactSubmitted(false); }} className="text-gray-500 hover:text-white text-sm underline">返回重新评估</button>
                 </div>
               </motion.div>
             )}
@@ -326,7 +384,6 @@ export const AssessmentSection: React.FC = () => {
         </div>
       </div>
 
-      {/* 留资弹窗逻辑保持 */}
       <AnimatePresence>
         {showFullReport && (
           <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
@@ -336,30 +393,30 @@ export const AssessmentSection: React.FC = () => {
               
               {!contactSubmitted ? (
                 <div className="text-center">
-                  <h3 className="text-2xl font-bold text-jicai-black mb-2">{inquiryContext.includes('清单') ? '获取完整定校清单' : '专属深度咨询'}</h3>
-                  <p className="text-gray-600 mb-6 text-sm">由于涉及各大学校最新的录取红线和学分审查，请输入联系方式，专家将针对【{formData.major}】为您发送一对一定制方案。</p>
+                  <h3 className="text-2xl font-bold text-jicai-black mb-2">{inquiryContext.includes('完整') ? '获取详细评估报告' : '专属深度咨询'}</h3>
+                  <p className="text-gray-600 mb-6 text-sm">请输入联系方式，专家将针对【{inquiryContext}】为您提供一对一规划与资料包。</p>
                   
                   <div className="mb-6 text-left">
                     <label className="block text-sm font-medium text-gray-700 mb-2">手机号或微信号 <span className="text-red-500">*</span></label>
-                    <input type="text" placeholder="用于接收评估结果与资料" value={formData.contact} onChange={(e) => handleInputChange('contact', e.target.value)} className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-800 focus:outline-none focus:border-jicai-blue transition-colors" />
+                    <input type="text" placeholder="用于接收资料与规划" value={formData.contact} onChange={(e) => handleInputChange('contact', e.target.value)} className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-800 focus:outline-none focus:border-jicai-blue transition-colors" />
                   </div>
                   
                   <button onClick={submitLead} disabled={isSubmitting} className="w-full bg-jicai-blue hover:bg-blue-600 text-white font-bold py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
-                    {isSubmitting ? '正在安全提交...' : '立即获取完整资料包'}
+                    {isSubmitting ? '正在安全提交...' : '立即预约专家'}
                   </button>
                 </div>
               ) : (
                 <div className="text-center">
                   <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4"><CheckCircle className="text-green-500" size={32} /></div>
-                  <h3 className="text-2xl font-bold text-jicai-black mb-2">预约成功！</h3>
-                  <p className="text-gray-600 mb-6 text-sm">您的专属顾问已收到您的学术背景，将为您核对ECTS学分与最新NC限制，并尽快联系您。</p>
+                  <h3 className="text-2xl font-bold text-jicai-black mb-2">预约已成功！</h3>
+                  <p className="text-gray-600 mb-6 text-sm">您的专属顾问已收到需求，将尽快联系您发送资料包。</p>
                   
                   <div className="bg-gray-50 p-4 rounded-xl inline-block mb-4 border border-gray-100">
-                    <div className="w-40 h-40 bg-white flex items-center justify-center rounded-lg border border-gray-200 mx-auto p-1">
+                    <div className="w-40 h-40 bg-white flex items-center justify-center rounded-lg border border-gray-200 mx-auto">
                        <img src="qrcode.png" alt="WeChat" className="w-full h-full object-contain" referrerPolicy="no-referrer" />
                     </div>
                   </div>
-                  <div className="space-y-1 text-sm text-gray-500"><p>等不及了？您也可以主动扫码添加顾问</p><p className="font-bold text-jicai-blue">微信: jicaixiaokefu</p></div>
+                  <div className="space-y-1 text-sm text-gray-500"><p>您也可以主动扫码添加顾问</p><p className="font-bold text-jicai-blue">微信: jicaixiaokefu</p></div>
                 </div>
               )}
             </motion.div>
