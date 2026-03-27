@@ -39,9 +39,14 @@ export const AssessmentSection: React.FC = () => {
 
     setTimeout(() => {
       clearInterval(interval);
-      setResult(calculateScore(formData as UserInput));
-      setLoading(false); setStep('result');
-      setTimeout(() => openLeadModal("获取完整评估与冲刺名单"), 6000);
+      try {
+        setResult(calculateScore(formData as UserInput));
+        setStep('result');
+        setTimeout(() => openLeadModal("获取完整评估与冲刺名单"), 6000);
+      } catch (error) {
+        console.error("计算出错", error);
+      }
+      setLoading(false); 
     }, 6500); 
   };
 
