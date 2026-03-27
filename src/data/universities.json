@@ -1,67 +1,352 @@
 [
   {
-    "name": "慕尼黑工业大学 (TUM)", "tier": "S", "minLang": "german_b2", "majors": ["机械工程", "计算机", "电气工程", "商科"],
-    "city": "慕尼黑", "ranking_qs": 37, "restricted": ["机械工程", "计算机"], "nc_score": {"机械工程": 1.5, "计算机": 1.8}, "apply_via": "direct", "deadline_winter": "1月15日", "monthly_cost": "€1000-1400", "website": "https://www.tum.de"
+    "name": "慕尼黑工业大学 (TUM)",
+    "tier": "S",
+    "minLang": "ielts_6.5",
+    "de_majors": ["机械工程", "计算机", "电气工程", "商科", "经济学"],
+    "en_majors": ["计算机", "商科"]
   },
   {
-    "name": "亚琛工业大学 (RWTH)", "tier": "S", "minLang": "german_c1", "majors": ["机械工程", "计算机", "电气工程"],
-    "city": "亚琛", "ranking_qs": 106, "restricted": [], "nc_score": {}, "apply_via": "direct", "deadline_winter": "3月1日", "monthly_cost": "€750-1000", "website": "https://www.rwth-aachen.de"
+    "name": "亚琛工业大学 (RWTH Aachen)",
+    "tier": "S",
+    "minLang": "german_b2",
+    "de_majors": ["机械工程", "计算机", "电气工程", "商科", "经济学"],
+    "en_majors": ["计算机"]
   },
   {
-    "name": "卡尔斯鲁厄理工学院 (KIT)", "tier": "S", "minLang": "german_c1", "majors": ["机械工程", "计算机", "电气工程", "经济学"],
-    "city": "卡尔斯鲁厄", "ranking_qs": 119, "restricted": ["计算机"], "nc_score": {"计算机": 2.0}, "apply_via": "direct", "deadline_winter": "3月15日", "monthly_cost": "€750-950", "website": "https://www.kit.edu"
+    "name": "卡尔斯鲁厄理工学院 (KIT)",
+    "tier": "S",
+    "minLang": "german_b2",
+    "de_majors": ["机械工程", "计算机", "电气工程", "经济学"],
+    "en_majors": ["计算机"]
   },
   {
-    "name": "曼海姆大学 (Uni Mannheim)", "tier": "S", "minLang": "german_c1", "majors": ["商科", "经济学", "计算机"],
-    "city": "曼海姆", "ranking_qs": 601, "restricted": ["商科", "经济学"], "nc_score": {"商科": 1.3, "经济学": 1.5}, "apply_via": "uni-assist", "deadline_winter": "5月31日", "monthly_cost": "€800-1100", "website": "https://www.uni-mannheim.de"
+    "name": "慕尼黑大学 (LMU)",
+    "tier": "S",
+    "minLang": "german_c1",
+    "de_majors": ["计算机", "商科", "经济学"],
+    "en_majors": ["经济学"]
   },
   {
-    "name": "柏林工业大学 (TUB)", "tier": "A", "minLang": "german_c1", "majors": ["机械工程", "计算机", "电气工程", "商科", "经济学"],
-    "city": "柏林", "ranking_qs": 154, "restricted": [], "nc_score": {}, "apply_via": "uni-assist", "deadline_winter": "5月15日", "monthly_cost": "€750-1000", "website": "https://www.tu.berlin"
+    "name": "海德堡大学 (Uni Heidelberg)",
+    "tier": "S",
+    "minLang": "german_c1",
+    "de_majors": ["计算机", "经济学"],
+    "en_majors": ["经济学"]
   },
-  {"name": "慕尼黑大学 (LMU)", "tier": "S", "minLang": "german_c1", "majors": ["商科", "经济学", "计算机"], "restricted": []},
-  {"name": "海德堡大学 (Uni Heidelberg)", "tier": "S", "minLang": "german_c1", "majors": ["计算机", "经济学"], "restricted": []},
-  {"name": "柏林洪堡大学 (HU Berlin)", "tier": "S", "minLang": "german_c1", "majors": ["商科", "经济学", "计算机"], "restricted": []},
-  {"name": "柏林自由大学 (FU Berlin)", "tier": "S", "minLang": "german_c1", "majors": ["商科", "经济学"], "restricted": []},
-  {"name": "斯图加特大学 (Uni Stuttgart)", "tier": "A", "minLang": "german_b2", "majors": ["机械工程", "电气工程", "计算机"], "restricted": []},
-  {"name": "达姆施塔特工业大学 (TU Darmstadt)", "tier": "A", "minLang": "german_c1", "majors": ["机械工程", "计算机", "电气工程"], "restricted": []},
-  {"name": "德累斯顿工业大学 (TUD)", "tier": "A", "minLang": "german_b2", "majors": ["机械工程", "电气工程", "计算机", "经济学"], "restricted": []},
-  {"name": "汉诺威大学 (LUH)", "tier": "B", "minLang": "german_b2", "majors": ["机械工程", "电气工程", "经济学"], "restricted": []},
-  {"name": "布伦瑞克工业大学 (TU Braunschweig)", "tier": "B", "minLang": "german_b2", "majors": ["机械工程", "电气工程", "计算机"], "restricted": []},
-  {"name": "科隆大学 (Uni Köln)", "tier": "A", "minLang": "german_c1", "majors": ["商科", "经济学"], "restricted": []},
-  {"name": "法兰克福大学 (Goethe Uni)", "tier": "A", "minLang": "german_c1", "majors": ["商科", "经济学", "计算机"], "restricted": []},
-  {"name": "波恩大学 (Uni Bonn)", "tier": "A", "minLang": "german_c1", "majors": ["经济学", "计算机"], "restricted": []},
-  {"name": "弗莱堡大学 (Uni Freiburg)", "tier": "A", "minLang": "german_c1", "majors": ["计算机", "经济学"], "restricted": []},
-  {"name": "图宾根大学 (Uni Tübingen)", "tier": "A", "minLang": "german_c1", "majors": ["计算机", "经济学"], "restricted": []},
-  {"name": "哥廷根大学 (Uni Göttingen)", "tier": "A", "minLang": "german_c1", "majors": ["经济学", "计算机"], "restricted": []},
-  {"name": "明斯特大学 (WWU Münster)", "tier": "A", "minLang": "german_c1", "majors": ["商科", "经济学", "计算机"], "restricted": []},
-  {"name": "纽伦堡大学 (FAU)", "tier": "B", "minLang": "german_b2", "majors": ["机械工程", "电气工程", "商科", "经济学"], "restricted": []},
-  {"name": "波鸿鲁尔大学 (RUB)", "tier": "B", "minLang": "german_b2", "majors": ["机械工程", "电气工程", "计算机", "经济学"], "restricted": []},
-  {"name": "维尔茨堡大学 (Uni Würzburg)", "tier": "B", "minLang": "german_c1", "majors": ["计算机", "经济学"], "restricted": []},
-  {"name": "美因茨大学 (JGU)", "tier": "B", "minLang": "german_c1", "majors": ["商科", "经济学"], "restricted": []},
-  {"name": "莱比锡大学 (Uni Leipzig)", "tier": "B", "minLang": "german_c1", "majors": ["商科", "经济学", "计算机"], "restricted": []},
-  {"name": "基尔大学 (CAU)", "tier": "B", "minLang": "german_c1", "majors": ["机械工程", "电气工程", "经济学"], "restricted": []},
-  {"name": "哈雷-维滕贝格大学 (MLU)", "tier": "B", "minLang": "german_b2", "majors": ["商科", "经济学"], "restricted": []},
-  {"name": "耶拿大学 (FSU Jena)", "tier": "B", "minLang": "german_c1", "majors": ["计算机", "经济学"], "restricted": []},
-  {"name": "吉森大学 (JLU)", "tier": "B", "minLang": "german_c1", "majors": ["经济学"], "restricted": []},
-  {"name": "马尔堡大学 (Uni Marburg)", "tier": "B", "minLang": "german_c1", "majors": ["经济学", "商科"], "restricted": []},
-  {"name": "罗斯托克大学 (Uni Rostock)", "tier": "B", "minLang": "german_b2", "majors": ["机械工程", "电气工程"], "restricted": []},
-  {"name": "格赖夫斯瓦尔德大学", "tier": "B", "minLang": "german_c1", "majors": ["经济学"], "restricted": []},
-  {"name": "不来梅大学 (Uni Bremen)", "tier": "B", "minLang": "german_b2", "majors": ["计算机", "电气工程"], "restricted": []},
-  {"name": "拜罗伊特大学 (Uni Bayreuth)", "tier": "B", "minLang": "german_c1", "majors": ["商科", "经济学"], "restricted": []},
-  {"name": "多特蒙德工业大学 (TU Dortmund)", "tier": "B", "minLang": "german_b2", "majors": ["机械工程", "计算机", "电气工程"], "restricted": []},
-  {"name": "杜伊斯堡-埃森大学 (UDE)", "tier": "B", "minLang": "german_b2", "majors": ["机械工程", "电气工程", "计算机", "商科"], "restricted": []},
-  {"name": "比勒费尔德大学", "tier": "B", "minLang": "german_b2", "majors": ["计算机", "经济学"], "restricted": []},
-  {"name": "康斯坦茨大学 (Uni Konstanz)", "tier": "B", "minLang": "german_c1", "majors": ["经济学", "计算机"], "restricted": []},
-  {"name": "乌尔姆大学 (Uni Ulm)", "tier": "B", "minLang": "german_b2", "majors": ["电气工程", "计算机", "经济学"], "restricted": []},
-  {"name": "帕绍大学 (Uni Passau)", "tier": "B", "minLang": "german_c1", "majors": ["计算机", "商科", "经济学"], "restricted": []},
-  {"name": "雷根斯堡大学 (Uni Regensburg)", "tier": "B", "minLang": "german_c1", "majors": ["商科", "经济学"], "restricted": []},
-  {"name": "萨尔大学 (Saarland Uni)", "tier": "A", "minLang": "german_b2", "majors": ["计算机", "电气工程"], "restricted": []},
-  {"name": "特里尔大学 (Uni Trier)", "tier": "B", "minLang": "german_c1", "majors": ["商科", "经济学"], "restricted": []},
-  {"name": "奥格斯堡大学 (Uni Augsburg)", "tier": "B", "minLang": "german_c1", "majors": ["经济学", "计算机"], "restricted": []},
-  {"name": "班贝格大学 (Uni Bamberg)", "tier": "B", "minLang": "german_c1", "majors": ["商科", "经济学", "计算机"], "restricted": []},
-  {"name": "奥斯纳布吕克大学", "tier": "B", "minLang": "german_b2", "majors": ["计算机", "经济学"], "restricted": []},
-  {"name": "帕德博恩大学 (UPB)", "tier": "B", "minLang": "german_b2", "majors": ["计算机", "机械工程", "电气工程"], "restricted": []},
-  {"name": "锡根大学 (Uni Siegen)", "tier": "B", "minLang": "german_b2", "majors": ["机械工程", "电气工程"], "restricted": []},
-  {"name": "伍珀塔尔大学 (BUW)", "tier": "B", "minLang": "german_b2", "majors": ["机械工程", "经济学"], "restricted": []}
+  {
+    "name": "柏林工业大学 (TU Berlin)",
+    "tier": "A",
+    "minLang": "german_b2",
+    "de_majors": ["机械工程", "计算机", "电气工程", "经济学"],
+    "en_majors": ["计算机"]
+  },
+  {
+    "name": "达姆施塔特工业大学 (TU Darmstadt)",
+    "tier": "A",
+    "minLang": "german_b2",
+    "de_majors": ["机械工程", "计算机", "电气工程", "经济学"],
+    "en_majors": ["计算机"]
+  },
+  {
+    "name": "德累斯顿工业大学 (TU Dresden)",
+    "tier": "A",
+    "minLang": "german_b2",
+    "de_majors": ["机械工程", "计算机", "电气工程", "经济学"],
+    "en_majors": ["计算机"]
+  },
+  {
+    "name": "斯图加特大学 (Uni Stuttgart)",
+    "tier": "A",
+    "minLang": "german_b2",
+    "de_majors": ["机械工程", "计算机", "电气工程"],
+    "en_majors": ["计算机"]
+  },
+  {
+    "name": "布伦瑞克工业大学 (TU Braunschweig)",
+    "tier": "B",
+    "minLang": "german_b2",
+    "de_majors": ["机械工程", "计算机", "电气工程"],
+    "en_majors": ["计算机"]
+  },
+  {
+    "name": "汉诺威大学 (Leibniz Uni Hannover)",
+    "tier": "B",
+    "minLang": "german_b2",
+    "de_majors": ["机械工程", "计算机", "电气工程", "经济学"],
+    "en_majors": []
+  },
+  {
+    "name": "柏林自由大学 (FU Berlin)",
+    "tier": "A",
+    "minLang": "german_c1",
+    "de_majors": ["计算机", "商科", "经济学"],
+    "en_majors": ["经济学"]
+  },
+  {
+    "name": "柏林洪堡大学 (HU Berlin)",
+    "tier": "A",
+    "minLang": "german_c1",
+    "de_majors": ["计算机", "商科", "经济学"],
+    "en_majors": ["经济学"]
+  },
+  {
+    "name": "波恩大学 (Uni Bonn)",
+    "tier": "A",
+    "minLang": "german_c1",
+    "de_majors": ["计算机", "经济学"],
+    "en_majors": ["经济学"]
+  },
+  {
+    "name": "汉堡大学 (Uni Hamburg)",
+    "tier": "A",
+    "minLang": "german_c1",
+    "de_majors": ["计算机", "商科", "经济学"],
+    "en_majors": ["经济学"]
+  },
+  {
+    "name": "康斯坦茨大学 (Uni Konstanz)",
+    "tier": "A",
+    "minLang": "german_c1",
+    "de_majors": ["计算机", "经济学"],
+    "en_majors": []
+  },
+  {
+    "name": "弗莱堡大学 (Uni Freiburg)",
+    "tier": "A",
+    "minLang": "german_c1",
+    "de_majors": ["计算机", "经济学"],
+    "en_majors": ["计算机"]
+  },
+  {
+    "name": "蒂宾根大学 (Uni Tübingen)",
+    "tier": "A",
+    "minLang": "german_c1",
+    "de_majors": ["计算机", "经济学"],
+    "en_majors": ["计算机"]
+  },
+  {
+    "name": "哥廷根大学 (Uni Göttingen)",
+    "tier": "A",
+    "minLang": "german_c1",
+    "de_majors": ["计算机", "经济学"],
+    "en_majors": []
+  },
+  {
+    "name": "法兰克福大学 (Goethe Uni Frankfurt)",
+    "tier": "A",
+    "minLang": "german_c1",
+    "de_majors": ["计算机", "商科", "经济学"],
+    "en_majors": ["经济学"]
+  },
+  {
+    "name": "明斯特大学 (Uni Münster)",
+    "tier": "A",
+    "minLang": "german_c1",
+    "de_majors": ["计算机", "商科", "经济学"],
+    "en_majors": ["经济学"]
+  },
+  {
+    "name": "科隆大学 (Uni Köln)",
+    "tier": "A",
+    "minLang": "german_c1",
+    "de_majors": ["计算机", "商科", "经济学"],
+    "en_majors": ["商科", "经济学"]
+  },
+  {
+    "name": "曼海姆大学 (Uni Mannheim)",
+    "tier": "A",
+    "minLang": "ielts_7",
+    "de_majors": ["商科", "经济学"],
+    "en_majors": ["商科", "经济学"]
+  },
+  {
+    "name": "莱比锡大学 (Uni Leipzig)",
+    "tier": "B",
+    "minLang": "german_c1",
+    "de_majors": ["计算机", "商科", "经济学"],
+    "en_majors": []
+  },
+  {
+    "name": "美因茨大学 (Uni Mainz)",
+    "tier": "B",
+    "minLang": "german_c1",
+    "de_majors": ["计算机", "经济学"],
+    "en_majors": []
+  },
+  {
+    "name": "维尔茨堡大学 (Uni Würzburg)",
+    "tier": "B",
+    "minLang": "german_c1",
+    "de_majors": ["计算机", "经济学"],
+    "en_majors": []
+  },
+  {
+    "name": "埃尔朗根-纽伦堡大学 (FAU)",
+    "tier": "A",
+    "minLang": "german_b2",
+    "de_majors": ["机械工程", "计算机", "电气工程", "经济学"],
+    "en_majors": ["计算机"]
+  },
+  {
+    "name": "杜伊斯堡-埃森大学 (Uni Duisburg-Essen)",
+    "tier": "B",
+    "minLang": "german_b2",
+    "de_majors": ["机械工程", "计算机", "电气工程", "商科", "经济学"],
+    "en_majors": ["计算机"]
+  },
+  {
+    "name": "不来梅大学 (Uni Bremen)",
+    "tier": "B",
+    "minLang": "german_b2",
+    "de_majors": ["计算机", "电气工程", "经济学"],
+    "en_majors": []
+  },
+  {
+    "name": "耶拿大学 (Uni Jena)",
+    "tier": "B",
+    "minLang": "german_c1",
+    "de_majors": ["计算机", "经济学"],
+    "en_majors": []
+  },
+  {
+    "name": "基尔大学 (Uni Kiel)",
+    "tier": "B",
+    "minLang": "german_c1",
+    "de_majors": ["计算机", "电气工程", "经济学"],
+    "en_majors": []
+  },
+  {
+    "name": "萨尔大学 (Uni Saarland)",
+    "tier": "B",
+    "minLang": "german_b2",
+    "de_majors": ["计算机", "经济学"],
+    "en_majors": ["计算机"]
+  },
+  {
+    "name": "比勒费尔德大学 (Uni Bielefeld)",
+    "tier": "B",
+    "minLang": "german_c1",
+    "de_majors": ["计算机", "经济学"],
+    "en_majors": []
+  },
+  {
+    "name": "波茨坦大学 (Uni Potsdam)",
+    "tier": "B",
+    "minLang": "german_c1",
+    "de_majors": ["计算机", "经济学"],
+    "en_majors": []
+  },
+  {
+    "name": "杜塞尔多夫大学 (Uni Düsseldorf)",
+    "tier": "B",
+    "minLang": "german_c1",
+    "de_majors": ["计算机", "商科", "经济学"],
+    "en_majors": []
+  },
+  {
+    "name": "乌尔姆大学 (Uni Ulm)",
+    "tier": "B",
+    "minLang": "german_b2",
+    "de_majors": ["计算机", "电气工程", "经济学"],
+    "en_majors": []
+  },
+  {
+    "name": "帕德博恩大学 (Uni Paderborn)",
+    "tier": "B",
+    "minLang": "german_b2",
+    "de_majors": ["机械工程", "计算机", "电气工程", "商科"],
+    "en_majors": []
+  },
+  {
+    "name": "马尔堡大学 (Uni Marburg)",
+    "tier": "B",
+    "minLang": "german_c1",
+    "de_majors": ["计算机", "经济学"],
+    "en_majors": []
+  },
+  {
+    "name": "雷根斯堡大学 (Uni Regensburg)",
+    "tier": "B",
+    "minLang": "german_c1",
+    "de_majors": ["计算机", "经济学"],
+    "en_majors": []
+  },
+  {
+    "name": "凯泽斯劳滕-兰道工业大学 (RPTU)",
+    "tier": "B",
+    "minLang": "german_b2",
+    "de_majors": ["机械工程", "计算机", "电气工程"],
+    "en_majors": []
+  },
+  {
+    "name": "卡塞尔大学 (Uni Kassel)",
+    "tier": "B",
+    "minLang": "german_b2",
+    "de_majors": ["机械工程", "计算机", "电气工程", "经济学"],
+    "en_majors": []
+  },
+  {
+    "name": "拜罗伊特大学 (Uni Bayreuth)",
+    "tier": "B",
+    "minLang": "german_c1",
+    "de_majors": ["计算机", "商科", "经济学"],
+    "en_majors": ["经济学"]
+  },
+  {
+    "name": "奥格斯堡大学 (Uni Augsburg)",
+    "tier": "B",
+    "minLang": "german_c1",
+    "de_majors": ["计算机", "商科", "经济学"],
+    "en_majors": []
+  },
+  {
+    "name": "马格德堡大学 (OVGU Magdeburg)",
+    "tier": "B",
+    "minLang": "german_b2",
+    "de_majors": ["机械工程", "计算机", "电气工程", "经济学"],
+    "en_majors": ["计算机"]
+  },
+  {
+    "name": "开姆尼茨工业大学 (TU Chemnitz)",
+    "tier": "B",
+    "minLang": "german_b2",
+    "de_majors": ["机械工程", "计算机", "电气工程"],
+    "en_majors": []
+  },
+  {
+    "name": "伊尔梅瑙工业大学 (TU Ilmenau)",
+    "tier": "B",
+    "minLang": "german_b2",
+    "de_majors": ["机械工程", "计算机", "电气工程"],
+    "en_majors": []
+  },
+  {
+    "name": "锡根大学 (Uni Siegen)",
+    "tier": "B",
+    "minLang": "german_b2",
+    "de_majors": ["机械工程", "计算机", "电气工程", "经济学"],
+    "en_majors": []
+  },
+  {
+    "name": "伍珀塔尔大学 (Uni Wuppertal)",
+    "tier": "B",
+    "minLang": "german_b2",
+    "de_majors": ["机械工程", "计算机", "电气工程", "经济学"],
+    "en_majors": []
+  },
+  {
+    "name": "罗斯托克大学 (Uni Rostock)",
+    "tier": "B",
+    "minLang": "german_b2",
+    "de_majors": ["机械工程", "计算机", "电气工程"],
+    "en_majors": []
+  },
+  {
+    "name": "克劳斯塔尔工业大学 (TU Clausthal)",
+    "tier": "B",
+    "minLang": "german_b2",
+    "de_majors": ["机械工程", "计算机"],
+    "en_majors": []
+  }
 ]
