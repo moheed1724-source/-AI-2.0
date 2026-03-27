@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { calculateScore, UserInput, AssessmentResult } from '../utils/scoring';
-import { Lock, X, BarChart3, CheckCircle, AlertTriangle, BookOpen, MessageCircle, FileText, Crosshair } from 'lucide-react';
+import { Lock, X, CheckCircle, AlertTriangle, BookOpen, MessageCircle, FileText, Crosshair } from 'lucide-react';
 
 export const AssessmentSection: React.FC = () => {
   const [step, setStep] = useState<'form' | 'result'>('form');
@@ -17,8 +17,7 @@ export const AssessmentSection: React.FC = () => {
   const [formData, setFormData] = useState<UserInput & { contact: string }>({
     degree: 'master', gpa: 85, language: 'german_b2', major: '机械工程', 
     background: '211', hasTest: 'no', highSchoolType: 'gaokao', 
-    highSchoolScore: 'good', contact: '',
-    hasFail: 'no', researchExp: [], province: 'other', gaokaoScore: undefined
+    highSchoolScore: 'good', contact: '', hasFail: 'no', researchExp: [], province: 'other', gaokaoScore: undefined
   });
 
   const handleInputChange = (field: string, value: any) => setFormData(prev => ({ ...prev, [field]: value }));
@@ -26,7 +25,7 @@ export const AssessmentSection: React.FC = () => {
   const loadingTexts = [
     "正在建立您的专属学术背景画像...",
     "正在通过巴伐利亚算法转换您的绩点...",
-    "正在全德 50 所主流院校库中进行比对...",
+    "正在全德最新院校库中进行比对...",
     "正在生成济才多维录取诊断书..."
   ];
 
@@ -42,15 +41,11 @@ export const AssessmentSection: React.FC = () => {
       clearInterval(interval);
       setResult(calculateScore(formData as UserInput));
       setLoading(false); setStep('result');
-      // 稍微延长弹窗时间，让家长有时间读完红色的ECTS警告
       setTimeout(() => openLeadModal("获取完整评估与冲刺名单"), 6000);
     }, 6500); 
   };
 
-  const openLeadModal = (context: string) => {
-    setInquiryContext(context);
-    setShowFullReport(true);
-  };
+  const openLeadModal = (context: string) => { setInquiryContext(context); setShowFullReport(true); };
 
   const submitLead = async () => {
     if (!formData.contact) return alert("请输入您的手机号或微信号！");
@@ -60,11 +55,7 @@ export const AssessmentSection: React.FC = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify({
-          access_key: "a531da67-7614-4c7b-992d-e87c02d63ac2",
-          '咨询意向': inquiryContext,
-          '联系方式': formData.contact,
-          '申请阶段': formData.degree,
-          '目标专业': formData.major,
+          access_key: "a531da67-7614-4c7b-992d-e87c02d63ac2", '咨询意向': inquiryContext, '联系方式': formData.contact, '申请阶段': formData.degree, '目标专业': formData.major,
         })
       });
       if (response.ok) setContactSubmitted(true);
@@ -82,7 +73,7 @@ export const AssessmentSection: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">AI 智能评估系统</h2>
-          <p className="text-gray-400 max-w-2xl mx-auto">引入巴伐利亚转换算法与50所院校库，多维预测录取概率</p>
+          <p className="text-gray-400 max-w-2xl mx-auto">引入巴伐利亚转换算法与最新院校库，多维预测申请竞争力</p>
         </div>
 
         <div className="max-w-4xl mx-auto bg-jicai-black/50 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
@@ -117,9 +108,9 @@ export const AssessmentSection: React.FC = () => {
                           </select>
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-400 mb-2">是否有挂科记录？</label>
+                          <label className="block text-sm font-medium text-gray-400 mb-2">是否有挂科记录？<span className="text-xs text-red-400 ml-1">(影响APS)</span></label>
                           <div className="flex gap-4">
-                            {[{val: 'no', label: '无挂科'}, {val: 'yes', label: '有挂科 (可能影响APS)'}].map((opt) => (
+                            {[{val: 'no', label: '无挂科'}, {val: 'yes', label: '有挂科'}].map((opt) => (
                               <button key={opt.val} onClick={() => handleInputChange('hasFail', opt.val)} className={`flex-1 py-3 px-4 rounded-xl border transition-all text-sm ${formData.hasFail === opt.val ? 'bg-jicai-blue/20 border-jicai-blue text-jicai-blue' : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'}`}>{opt.label}</button>
                             ))}
                           </div>
@@ -130,14 +121,9 @@ export const AssessmentSection: React.FC = () => {
                         <div>
                           <label className="block text-sm font-medium text-gray-400 mb-2">课程体系 <span className="text-red-400">*</span></label>
                           <select value={formData.highSchoolType} onChange={(e) => handleInputChange('highSchoolType', e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-jicai-blue transition-colors">
-                            <option value="gaokao">普通高中 (走高考程序)</option>
-                            <option value="AL">A-Level 课程</option>
-                            <option value="IB">IB 课程</option>
-                            <option value="AP">AP 课程</option>
-                            <option value="OSSD">OSSD / 其他国际体系</option>
+                            <option value="gaokao">普通高中 (走高考程序)</option><option value="AL">A-Level 课程</option><option value="IB">IB 课程</option><option value="AP">AP 课程</option><option value="OSSD">OSSD / 其他国际体系</option>
                           </select>
                         </div>
-
                         {formData.highSchoolType === 'gaokao' && (
                           <>
                             <div>
@@ -152,7 +138,6 @@ export const AssessmentSection: React.FC = () => {
                             </div>
                           </>
                         )}
-
                         {formData.highSchoolType !== 'gaokao' && (
                           <div>
                             <label className="block text-sm font-medium text-gray-400 mb-2">目前成绩预估水平</label>
@@ -197,7 +182,7 @@ export const AssessmentSection: React.FC = () => {
                   <button onClick={handleGenerate} disabled={loading} className="w-full bg-jicai-blue hover:bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 relative overflow-hidden h-16">
                     {loading ? (
                        <AnimatePresence mode="wait"><motion.span key={loadingStep} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -15 }} transition={{ duration: 0.3 }} className="text-white/90 text-sm md:text-base font-medium">{loadingTexts[loadingStep]}</motion.span></AnimatePresence>
-                    ) : '开始精准计算概率'}
+                    ) : '开始诊断申请条件'}
                   </button>
                 </div>
               </motion.div>
@@ -209,7 +194,7 @@ export const AssessmentSection: React.FC = () => {
                   <div className="flex items-center gap-6">
                     <div className="relative">
                       <svg className="w-24 h-24 transform -rotate-90"><circle className="text-gray-700" strokeWidth="6" stroke="currentColor" fill="transparent" r="44" cx="48" cy="48" /><circle className="text-jicai-blue" strokeWidth="6" strokeDasharray={276} strokeDashoffset={276 - (276 * (result?.score || 0)) / 100} strokeLinecap="round" stroke="currentColor" fill="transparent" r="44" cx="48" cy="48" /></svg>
-                      <div className="absolute inset-0 flex flex-col items-center justify-center"><span className="text-2xl font-bold text-white">{result?.score}</span><span className="text-[10px] text-gray-400">综合判定</span></div>
+                      <div className="absolute inset-0 flex flex-col items-center justify-center"><span className="text-2xl font-bold text-white">{result?.score}</span><span className="text-[10px] text-gray-400">综合评估</span></div>
                     </div>
                     <div>
                       <h3 className="text-2xl font-bold text-white mb-2">多维体检报告已生成</h3>
@@ -218,7 +203,7 @@ export const AssessmentSection: React.FC = () => {
                   </div>
                 </div>
 
-                {/* 多维度诊断雷达与文字分析 */}
+                {/* 多维度诊断 */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
                    <div className="bg-white/5 p-4 rounded-xl border border-white/10 hover:border-jicai-blue/50 transition-colors">
                       <h4 className="text-jicai-blue text-sm font-bold mb-2">📚 学术竞争力</h4>
@@ -250,13 +235,7 @@ export const AssessmentSection: React.FC = () => {
                   </div>
                 )}
 
-                {/* 🌟 核心痛点3修复：标题修改与免责预警 */}
-                <div className="space-y-4 mb-4">
-                  <h4 className="text-lg font-bold text-white flex items-center gap-2">
-                    <Crosshair size={20} className="text-jicai-blue" /> 【{formData.major}】综合硬件达标率
-                  </h4>
-                  {result?.predictions.map((pred: any, i) => (
-                    {/* 🌟 全新设计：取消百分比，采用竞争烈度星级与硬件诊断标签 */}
+                {/* 🌟 核心：取消百分比，采用标签判定 */}
                 <div className="space-y-4 mb-4">
                   <h4 className="text-lg font-bold text-white flex items-center gap-2 mb-4">
                     <Crosshair size={20} className="text-jicai-blue" /> 【{formData.major}】硬件条件判定报告
@@ -267,10 +246,9 @@ export const AssessmentSection: React.FC = () => {
                         <div className="flex items-center gap-3">
                           <span className="font-bold text-white text-lg">{pred.name}</span>
                           <span className={`text-[10px] px-2 py-0.5 rounded-full border ${pred.type === 'reach' ? 'border-red-500/50 text-red-400' : pred.type === 'match' ? 'border-blue-500/50 text-blue-400' : 'border-green-500/50 text-green-400'}`}>
-                            {pred.type === 'reach' ? '超高难度冲刺' : pred.type === 'match' ? '核心对标匹配' : '相对稳妥策略'}
+                            {pred.type === 'reach' ? '难度极大冲刺' : pred.type === 'match' ? '核心对标匹配' : '相对稳妥策略'}
                           </span>
                         </div>
-                        {/* 竞争烈度展示 (用火焰或星星) */}
                         <div className="flex items-center gap-1 text-sm text-gray-400">
                           <span>竞争烈度:</span>
                           <span className="text-orange-500 flex tracking-tighter">
@@ -281,7 +259,6 @@ export const AssessmentSection: React.FC = () => {
                         </div>
                       </div>
                       
-                      {/* 🌟 核心：硬件诊断标签阵列 (完全替代进度条) */}
                       <div className="flex flex-wrap gap-2">
                         {pred.badges.map((badge: any, bIdx: number) => (
                           <div key={bIdx} className={`text-xs px-2.5 py-1.5 rounded flex items-center gap-1 border ${
@@ -296,18 +273,13 @@ export const AssessmentSection: React.FC = () => {
                     </div>
                   ))}
                 </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
 
-                {/* 🌟 核心痛点3修复：强力逼单警告框 */}
                 <div className="mb-8 p-5 bg-red-500/10 border border-red-500/30 rounded-xl shadow-inner">
                    <h5 className="text-red-400 text-sm font-bold flex items-center gap-2 mb-2">
                      <AlertTriangle size={18} /> ⚠️ 郑重风险提示 (ECTS 学分陷阱)
                    </h5>
                    <p className="text-gray-300 text-xs leading-relaxed mb-4">
-                     本系统给出的概率仅代表您的均分与语言等【硬件门槛】达标。德国名校实行极其严苛的【专业直系录入制度】。若您的本科成绩单中缺失目标专业要求的特定核心学分（ECTS模块），无论均分多高都将被直接拒录 (Ablehnung)。
+                     本系统展示的指标仅代表您的均分与语言等【硬件门槛】达标。德国名校实行极其严苛的【专业直系录入制度】。若您的本科成绩单中缺失目标专业要求的特定核心学分（ECTS模块），无论均分多高都将被直接拒录 (Ablehnung)。
                    </p>
                    <button onClick={() => openLeadModal("人工深度ECTS学分对齐与查漏补缺")} className="w-full py-3 bg-red-500/20 hover:bg-red-500/40 text-red-300 text-sm font-bold rounded-lg transition-colors border border-red-500/30 shadow-lg">
                      拒绝盲目当炮灰！点击预约专家进行 ECTS 学分精准对齐
