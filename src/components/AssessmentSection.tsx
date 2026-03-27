@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { calculateScore, UserInput, AssessmentResult } from '../utils/scoring';
-import { Lock, X, BarChart3, CheckCircle, AlertTriangle, BookOpen, MessageCircle, FileText } from 'lucide-react';
+import { Lock, X, BarChart3, CheckCircle, AlertTriangle, BookOpen, MessageCircle, FileText, Crosshair } from 'lucide-react';
 
 export const AssessmentSection: React.FC = () => {
   const [step, setStep] = useState<'form' | 'result'>('form');
@@ -14,7 +14,6 @@ export const AssessmentSection: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [contactSubmitted, setContactSubmitted] = useState(false);
 
-  // 初始化所有所需字段
   const [formData, setFormData] = useState<UserInput & { contact: string }>({
     degree: 'master', gpa: 85, language: 'german_b2', major: '机械工程', 
     background: '211', hasTest: 'no', highSchoolType: 'gaokao', 
@@ -43,7 +42,8 @@ export const AssessmentSection: React.FC = () => {
       clearInterval(interval);
       setResult(calculateScore(formData as UserInput));
       setLoading(false); setStep('result');
-      setTimeout(() => openLeadModal("获取完整评估与冲刺名单"), 3000);
+      // 稍微延长弹窗时间，让家长有时间读完红色的ECTS警告
+      setTimeout(() => openLeadModal("获取完整评估与冲刺名单"), 6000);
     }, 6500); 
   };
 
@@ -116,120 +116,48 @@ export const AssessmentSection: React.FC = () => {
                             <option value="985">985 院校</option><option value="211">211 院校</option><option value="tier1">普通一本</option><option value="tier2">二本及其他</option>
                           </select>
                         </div>
-                        {/* 新增: 挂科记录 */}
                         <div>
-                          <label className="block text-sm font-medium text-gray-400 mb-2">
-                            是否有挂科记录？<span className="text-xs text-red-400 ml-1">(影响APS评估)</span>
-                          </label>
+                          <label className="block text-sm font-medium text-gray-400 mb-2">是否有挂科记录？</label>
                           <div className="flex gap-4">
                             {[{val: 'no', label: '无挂科'}, {val: 'yes', label: '有挂科 (可能影响APS)'}].map((opt) => (
-                              <button key={opt.val} onClick={() => handleInputChange('hasFail', opt.val)} className={`flex-1 py-3 px-4 rounded-xl border transition-all text-sm ${formData.hasFail === opt.val ? 'bg-jicai-blue/20 border-jicai-blue text-jicai-blue' : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'}`}>
-                                {opt.label}
-                              </button>
+                              <button key={opt.val} onClick={() => handleInputChange('hasFail', opt.val)} className={`flex-1 py-3 px-4 rounded-xl border transition-all text-sm ${formData.hasFail === opt.val ? 'bg-jicai-blue/20 border-jicai-blue text-jicai-blue' : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'}`}>{opt.label}</button>
                             ))}
-                          </div>
-                          {formData.hasFail === 'yes' && (
-                            <p className="text-xs text-red-400 mt-2">提示：挂科记录需在APS面谈中给出合理解释。</p>
-                          )}
-                        </div>
-                        {/* 新增: 附加经历 */}
-                        <div>
-                          <label className="block text-sm font-medium text-gray-400 mb-2">
-                            附加经历补充 <span className="text-xs text-gray-500 ml-1">(多选加分项)</span>
-                          </label>
-                          <div className="grid grid-cols-2 gap-2">
-                            {[
-                              {val: 'research', label: '科研/实验室'}, {val: 'paper', label: '发表论文'},
-                              {val: 'intern', label: '相关实习'}, {val: 'competition', label: '学科竞赛'},
-                              {val: 'exchange', label: '交换/访学'}, {val: 'none', label: '暂无以上经历'}
-                            ].map((exp) => {
-                              const selected = formData.researchExp?.includes(exp.val);
-                              return (
-                                <button key={exp.val} onClick={() => {
-                                  const current = formData.researchExp || [];
-                                  const updated = selected ? current.filter(v => v !== exp.val) : [...current, exp.val];
-                                  handleInputChange('researchExp', updated);
-                                }} className={`py-2.5 px-3 rounded-xl border transition-all text-sm text-left ${selected ? 'bg-jicai-blue/20 border-jicai-blue text-jicai-blue' : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'}`}>
-                                  {exp.label}
-                                </button>
-                              );
-                            })}
                           </div>
                         </div>
                       </>
                     ) : (
                       <>
-                        {/* 本科：课程体系 */}
                         <div>
-                          <label className="block text-sm font-medium text-gray-400 mb-2">
-                            课程体系 <span className="text-red-400">*</span>
-                          </label>
+                          <label className="block text-sm font-medium text-gray-400 mb-2">课程体系 <span className="text-red-400">*</span></label>
                           <select value={formData.highSchoolType} onChange={(e) => handleInputChange('highSchoolType', e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-jicai-blue transition-colors">
                             <option value="gaokao">普通高中 (走高考程序)</option>
                             <option value="AL">A-Level 课程</option>
                             <option value="IB">IB 课程</option>
                             <option value="AP">AP 课程</option>
                             <option value="OSSD">OSSD / 其他国际体系</option>
-                            <option value="studienkolleg">德国预科在读 (Studienkolleg)</option>
                           </select>
                         </div>
 
-                        {/* 本科：高考路线分数输入 */}
                         {formData.highSchoolType === 'gaokao' && (
                           <>
                             <div>
                               <label className="block text-sm font-medium text-gray-400 mb-2">高考所在省份</label>
                               <select value={formData.province} onChange={(e) => handleInputChange('province', e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-jicai-blue transition-colors">
-                                <option value="other">全国卷及其他省份 (满分750)</option>
-                                <option value="shanghai">上海卷 (满分660)</option>
-                                <option value="hainan">海南卷 (满分900)</option>
+                                <option value="other">全国卷及其他省份 (满分750)</option><option value="shanghai">上海卷 (满分660)</option><option value="hainan">海南卷 (满分900)</option>
                               </select>
                             </div>
                             <div>
-                              <label className="block text-sm font-medium text-gray-400 mb-2">
-                                预估/真实高考总分
-                              </label>
+                              <label className="block text-sm font-medium text-gray-400 mb-2">预估/真实高考总分</label>
                               <input type="number" min="200" max="900" value={formData.gaokaoScore || ''} onChange={(e) => handleInputChange('gaokaoScore', parseInt(e.target.value) || undefined)} placeholder="输入分数, 如 588" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-jicai-blue transition-colors" />
-                              
-                              {/* 实时分数换算提示 */}
-                              {formData.gaokaoScore && formData.gaokaoScore > 200 && (
-                                <p className="text-xs text-jicai-blue mt-2">
-                                  该分数达到满分的 {((formData.gaokaoScore / (formData.province === 'shanghai' ? 660 : formData.province === 'hainan' ? 900 : 750)) * 100).toFixed(1)}% (德国直录标准: 70%)
-                                </p>
-                              )}
                             </div>
                           </>
                         )}
 
-                        {/* 本科：国际课程路线预估等级 */}
                         {formData.highSchoolType !== 'gaokao' && (
                           <div>
                             <label className="block text-sm font-medium text-gray-400 mb-2">目前成绩预估水平</label>
                             <select value={formData.highSchoolScore} onChange={(e) => handleInputChange('highSchoolScore', e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-jicai-blue transition-colors">
-                              {formData.highSchoolType === 'IB' && (
-                                <>
-                                  <option value="excellent">拔尖 (38分及以上)</option>
-                                  <option value="good">良好 (33-37分)</option>
-                                  <option value="average">中等 (28-32分)</option>
-                                  <option value="low">偏低 (需要预科)</option>
-                                </>
-                              )}
-                              {formData.highSchoolType === 'AL' && (
-                                <>
-                                  <option value="excellent">拔尖 (A*A*A及以上)</option>
-                                  <option value="good">良好 (AAB-ABB)</option>
-                                  <option value="average">中等 (BBB-BCC)</option>
-                                  <option value="low">偏低 (需要预科)</option>
-                                </>
-                              )}
-                              {['AP', 'OSSD', 'studienkolleg'].includes(formData.highSchoolType || '') && (
-                                <>
-                                  <option value="excellent">成绩优异</option>
-                                  <option value="good">成绩良好</option>
-                                  <option value="average">成绩中等</option>
-                                  <option value="low">成绩偏弱</option>
-                                </>
-                              )}
+                              <option value="excellent">成绩优异 (拔尖)</option><option value="good">成绩良好</option><option value="average">成绩中等</option><option value="low">成绩偏弱 (可能需预科)</option>
                             </select>
                           </div>
                         )}
@@ -245,13 +173,10 @@ export const AssessmentSection: React.FC = () => {
                         <option value="机械工程">机械工程</option><option value="计算机">计算机科学</option><option value="电气工程">电气工程</option><option value="商科">商科/管理</option><option value="经济学">经济学</option>
                       </select>
                     </div>
-                    {/* 德语状态 */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-400 mb-2">
-                        目前语言水平 <span className="text-xs text-gray-500 ml-1">(部分院校要求网申带语言)</span>
-                      </label>
+                      <label className="block text-sm font-medium text-gray-400 mb-2">目前语言水平</label>
                       <select value={formData.language} onChange={(e) => handleInputChange('language', e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-jicai-blue transition-colors">
-                        <option value="german_c1">德语 TestDaF 4x4 / C1</option><option value="german_b2">德语 B2</option><option value="german_b1">德语 B1</option><option value="ielts_7">雅思 7.0+</option><option value="ielts_6.5">雅思 6.5</option><option value="other">其他 / 暂无 / 正在学</option>
+                        <option value="german_c1">德语 TestDaF 4x4 / C1</option><option value="german_b2">德语 B2</option><option value="german_b1">德语 B1</option><option value="ielts_7">雅思 7.0+</option><option value="ielts_6.5">雅思 6.5</option><option value="other">其他 / 暂无</option>
                       </select>
                     </div>
                     {formData.degree === 'master' && (
@@ -309,28 +234,27 @@ export const AssessmentSection: React.FC = () => {
                    </div>
                 </div>
 
-                {/* 新增：GPA 和 APS 预测展示区 */}
+                {/* GPA 和 APS 预测展示区 */}
                 {result?.bavarianScoreDisplay && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                    {/* 德国GPA换算 */}
                     <div className="bg-white/5 border border-jicai-blue/30 rounded-xl p-4">
                       <h4 className="text-jicai-blue text-sm font-bold mb-2">🎓 预估德国 GPA 成绩</h4>
                       <div className="text-3xl font-bold text-white mb-1">{result.bavarianScoreDisplay}</div>
-                      <p className="text-xs text-gray-400">基于巴伐利亚公式推算 (1.0为满分，4.0及格)</p>
+                      <p className="text-xs text-gray-400">基于巴伐利亚公式推算 (1.0为满分)</p>
                     </div>
-
-                    {/* APS通过率预测 */}
                     <div className="bg-white/5 border border-purple-500/30 rounded-xl p-4">
                       <h4 className="text-purple-400 text-sm font-bold mb-2">🛡️ 留德 APS 审核预测</h4>
-                      <div className="text-xl font-bold text-white mb-1">{result.apsPrediction.split(' ')[0]}</div>
+                      <div className="text-lg font-bold text-white mb-1">{result.apsPrediction.split(' ')[0]}</div>
                       <p className="text-xs text-gray-400 leading-relaxed">{result.apsPrediction.substring(result.apsPrediction.indexOf('('))}</p>
                     </div>
                   </div>
                 )}
 
-                {/* 核心院校名单 */}
-                <div className="space-y-4 mb-8">
-                  <h4 className="text-lg font-bold text-white flex items-center gap-2"><BarChart3 size={20} className="text-jicai-blue" /> 巴伐利亚算法匹配结果</h4>
+                {/* 🌟 核心痛点3修复：标题修改与免责预警 */}
+                <div className="space-y-4 mb-4">
+                  <h4 className="text-lg font-bold text-white flex items-center gap-2">
+                    <Crosshair size={20} className="text-jicai-blue" /> 【{formData.major}】综合硬件达标率
+                  </h4>
                   {result?.predictions.map((pred: any, i) => (
                     <div key={i} className="bg-white/5 border border-white/10 rounded-xl p-4">
                       <div className="flex justify-between items-center mb-2">
@@ -350,16 +274,24 @@ export const AssessmentSection: React.FC = () => {
                             <AlertTriangle size={14} className="shrink-0 mt-0.5" /><span>{pred.warningMsg}</span>
                          </div>
                       )}
-                      {/* 新增：受限专业预警 */}
-                      {pred.isNc && (
-                         <div className="mt-2 text-xs text-yellow-400 flex items-start gap-1 bg-yellow-900/20 p-2 rounded border border-yellow-500/30">
-                            <AlertTriangle size={14} className="shrink-0 mt-0.5" /><span>Numerus Clausus (NC) 受限专业预警：该专业招生名额存在严格限制，竞争激烈。</span>
-                         </div>
-                      )}
                     </div>
                   ))}
                 </div>
 
+                {/* 🌟 核心痛点3修复：强力逼单警告框 */}
+                <div className="mb-8 p-5 bg-red-500/10 border border-red-500/30 rounded-xl shadow-inner">
+                   <h5 className="text-red-400 text-sm font-bold flex items-center gap-2 mb-2">
+                     <AlertTriangle size={18} /> ⚠️ 郑重风险提示 (ECTS 学分陷阱)
+                   </h5>
+                   <p className="text-gray-300 text-xs leading-relaxed mb-4">
+                     本系统给出的概率仅代表您的均分与语言等【硬件门槛】达标。德国名校实行极其严苛的【专业直系录入制度】。若您的本科成绩单中缺失目标专业要求的特定核心学分（ECTS模块），无论均分多高都将被直接拒录 (Ablehnung)。
+                   </p>
+                   <button onClick={() => openLeadModal("人工深度ECTS学分对齐与查漏补缺")} className="w-full py-3 bg-red-500/20 hover:bg-red-500/40 text-red-300 text-sm font-bold rounded-lg transition-colors border border-red-500/30 shadow-lg">
+                     拒绝盲目当炮灰！点击预约专家进行 ECTS 学分精准对齐
+                   </button>
+                </div>
+
+                {/* 其他咨询入口 */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
                   <button onClick={() => openLeadModal(`咨询 ${formData.major} 专业详情及课程匹配`)} className="bg-white/5 hover:bg-jicai-blue/20 border border-white/10 hover:border-jicai-blue p-3 rounded-lg text-xs text-gray-300 transition-all flex flex-col items-center gap-2">
                     <BookOpen size={18} className="text-jicai-blue" /> 深度专业解析
@@ -384,6 +316,7 @@ export const AssessmentSection: React.FC = () => {
         </div>
       </div>
 
+      {/* 弹窗逻辑保持不变 */}
       <AnimatePresence>
         {showFullReport && (
           <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
